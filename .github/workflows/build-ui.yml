@@ -1,0 +1,30 @@
+name: Build Obsidian UI Plugins
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        plugin: [GOKU, VEGETA]
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install dependencies for ${{ matrix.plugin }}
+      working-directory: ./obsidian-ai-chat/mention-test/${{ matrix.plugin }}
+      run: npm install
+      
+    - name: Build ${{ matrix.plugin }}
+      working-directory: ./obsidian-ai-chat/mention-test/${{ matrix.plugin }}
+      run: npm run build
