@@ -1,0 +1,43 @@
+name: Build and Push Distribution
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.MOBILE_PUSH_TOKEN }}
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Build GOKU
+      working-directory: ./obsidian-ai-chat/mention-test/GOKU
+      run: |
+        npm install
+        npm run build
+        
+    - name: Build VEGETA
+      working-directory: ./obsidian-ai-chat/mention-test/VEGETA
+      run: |
+        npm install
+        npm run build
+        
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+    - name: Commit and Push dist
+      run: |
+        git add -f obsidian-ai-chat/mention-test/GOKU/dist
+        git add -f obsidian-ai-chat/mention-test/VEGETA/dist
+        git diff --staged --quiet || (git commit -m "Build: Update dist files for GOKU and VEGETA" && git push)
