@@ -1,0 +1,14 @@
+{
+	"id": "vegeta-terminal-output",
+	"name": "VEGETA‐Terminal",
+	"version": "1.0.0",
+	"author": "Rebuild Factoryz",
+	"description": "Professional terminal output interface with real-time command execution and ANSI color support",
+	"main": "main.js",
+	"styles": "style.css",
+	"minAppVersion": "0.15.0",
+	"isDesktopOnly": false,
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://www.buymeacoffee.com/rebuildfactoryz"
+	}
+}

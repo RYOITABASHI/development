@@ -1,0 +1,14 @@
+{
+	"id": "goku-multi-model-chat",
+	"name": "GOKU‐AI Chat",
+	"version": "1.0.0",
+	"author": "Rebuild Factoryz",
+	"description": "Advanced multi-model AI chat interface with real-time conversations and model switching capabilities",
+	"main": "main.js",
+	"styles": "style.css",
+	"minAppVersion": "0.15.0",
+	"isDesktopOnly": false,
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://www.buymeacoffee.com/rebuildfactoryz"
+	}
+}
