@@ -250,14 +250,11 @@ jobs:
         git diff --staged --name-status
         
         # コミットメッセージの作成
-        COMMIT_MSG="feat: update Obsidian plugins from ${{ github.sha }}
+        COMMIT_MSG="feat: update Obsidian plugins
 
 Updated GOKU and VEGETA plugins from development repository
-- GOKU: Multi-chat functionality
-- VEGETA: Multi-chat functionality
-
-Source: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-Triggered by: ${{ github.event_name }} on ${{ github.ref_name }}"
+- GOKU: Multi-chat functionality  
+- VEGETA: Multi-chat functionality"
         
         # コミット
         git commit -m "$COMMIT_MSG"
