@@ -1,0 +1,86 @@
+name: Push to Vault Repository
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'obsidian-ai-chat/mention-test/GOKU/**'
+      - 'obsidian-ai-chat/mention-test/VEGETA/**'
+  workflow_dispatch:
+
+jobs:
+  push-to-vault:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Development repository
+      uses: actions/checkout@v4
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Build GOKU
+      working-directory: ./obsidian-ai-chat/mention-test/GOKU
+      run: |
+        npm install
+        npm run build
+        
+    - name: Build VEGETA
+      working-directory: ./obsidian-ai-chat/mention-test/VEGETA
+      run: |
+        npm install
+        npm run build
+        
+    - name: Checkout Vault repository
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository_owner }}/obsidian-vault
+        path: vault
+        token: ${{ secrets.VAULT_PUSH_TOKEN }}
+        
+    - name: Copy dist to Vault plugins
+      run: |
+        # Create plugin directories if they don't exist
+        mkdir -p vault/.obsidian/plugins/goku-multi-chat
+        mkdir -p vault/.obsidian/plugins/vegeta-multi-chat
+        
+        # Copy GOKU dist files
+        cp -r obsidian-ai-chat/mention-test/GOKU/dist/* vault/.obsidian/plugins/goku-multi-chat/
+        
+        # Copy VEGETA dist files
+        cp -r obsidian-ai-chat/mention-test/VEGETA/dist/* vault/.obsidian/plugins/vegeta-multi-chat/
+        
+        # Copy manifest files
+        cp obsidian-ai-chat/mention-test/GOKU/manifest.json vault/.obsidian/plugins/goku-multi-chat/
+        cp obsidian-ai-chat/mention-test/VEGETA/manifest.json vault/.obsidian/plugins/vegeta-multi-chat/
+        
+    - name: Commit and Push to Vault
+      working-directory: ./vault
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        
+        # Check current status
+        echo "=== Git Status ==="
+        git status
+        
+        # Add files
+        git add .obsidian/plugins/goku-multi-chat
+        git add .obsidian/plugins/vegeta-multi-chat
+        
+        # Check if there are changes to commit
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          echo "=== Changes to commit ==="
+          git diff --staged --name-status
+          
+          # Commit changes
+          git commit -m "feat: update plugins"
+          
+          # Push changes
+          echo "=== Pushing changes ==="
+          git push origin HEAD:main
+        fi
