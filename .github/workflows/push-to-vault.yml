@@ -8,7 +8,6 @@ on:
       - 'obsidian-ai-chat/mention-test/VEGETA/**'
   workflow_dispatch:
 
-# 環境変数の定義で保守性を向上
 env:
   NODE_VERSION: '20'
   GOKU_PATH: 'obsidian-ai-chat/mention-test/GOKU'
@@ -19,76 +18,136 @@ env:
 jobs:
   push-to-vault:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: 🏁 Checkout Development repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # コミット履歴の完全取得
-        
-    - name: 📦 Setup Node.js with cache
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        cache-dependency-path: |
-          ${{ env.GOKU_PATH }}/package-lock.json
-          ${{ env.VEGETA_PATH }}/package-lock.json
-        
-    - name: 🔍 Check build prerequisites
-      id: check-prerequisites
-      run: |
-        set -e
-        echo "🔍 ビルド前提条件を確認中..."
-        
-        # package.jsonの存在確認
-        for plugin in GOKU VEGETA; do
-          path="obsidian-ai-chat/mention-test/$plugin"
-          if [ ! -f "$path/package.json" ]; then
-            echo "❌ エラー: $path に package.json が見つかりません"
-            exit 1
-          fi
-          echo "✅ $plugin: package.json を確認"
-          
-          # package-lock.jsonの存在確認
-          if [ -f "$path/package-lock.json" ]; then
-            echo "has_lock_$plugin=true" >> $GITHUB_OUTPUT
-            echo "✅ $plugin: package-lock.json を確認"
-          else
-            echo "has_lock_$plugin=false" >> $GITHUB_OUTPUT
-            echo "⚠️  $plugin: package-lock.json が見つかりません (npm install を使用します)"
-          fi
-        done
-        
-    - name: 🏗️ Build plugins in parallel with error handling
-      run: |
-        set -e
-        
-        # エラーハンドリング付きビルド関数
-        build_plugin() {
-          local plugin=$1
-          local path="obsidian-ai-chat/mention-test/$plugin"
-          local has_lock=$2
-          
-          echo "🏗️  [$plugin] ビルドを開始..."
-          
-          # ディレクトリ移動
-          cd "$GITHUB_WORKSPACE/$path" || {
-            echo "❌ [$plugin] ディレクトリ $path への移動に失敗しました"
-            return 1
+      - name: 🏁 Checkout Development repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node.js with cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ env.NODE_VERSION }}'
+          cache: 'npm'
+          cache-dependency-path: |
+            ${{ env.GOKU_PATH }}/package-lock.json
+            ${{ env.VEGETA_PATH }}/package-lock.json
+
+      - name: 🔍 Check build prerequisites
+        id: check-prerequisites
+        run: |
+          set -e
+          for plugin in GOKU VEGETA; do
+            path="obsidian-ai-chat/mention-test/$plugin"
+            if [ ! -f "$path/package.json" ]; then
+              echo "$path/package.json not found" >&2
+              exit 1
+            fi
+            if [ -f "$path/package-lock.json" ]; then
+              echo "has_lock_${plugin}=true" >> $GITHUB_ENV
+            else
+              echo "has_lock_${plugin}=false" >> $GITHUB_ENV
+            fi
+          done
+
+      - name: 🏗️ Build plugins
+        run: |
+          set -e
+          build_plugin() {
+            local plugin=$1
+            local path="obsidian-ai-chat/mention-test/$plugin"
+            local has_lock_var="has_lock_${plugin}"
+            cd "$GITHUB_WORKSPACE/$path"
+
+            if [ "${!has_lock_var}" = "true" ]; then
+              npm ci
+            else
+              npm install
+            fi
+
+            npm run build
+
+            if [ ! -d "dist" ] || [ ! -f "dist/main.js" ]; then
+              echo "Build failed for $plugin" >&2
+              exit 1
+            fi
+            cd - >/dev/null
           }
-          
-          # 依存関係のインストール
-          echo "📦 [$plugin] 依存関係をインストール中..."
-          if [ "$has_lock" = "true" ]; then
-            npm ci || {
-              echo "❌ [$plugin] npm ci が失敗しました"
-              return 1
-            }
-          else
-            npm install || {
-              echo "❌ [$plugin] npm install が失敗しました"
-              return 1
+
+          build_plugin GOKU
+          build_plugin VEGETA
+
+      - name: 📥 Checkout Vault repository
+        uses: actions/checkout@v4
+        with:
+          repository: '${{ env.VAULT_REPO }}'
+          path: vault
+          token: '${{ secrets.VAULT_PUSH_TOKEN }}'
+          ref: '${{ env.VAULT_BRANCH }}'
+          fetch-depth: 0
+
+      - name: 📋 Copy plugins to Vault
+        run: |
+          set -e
+          mkdir -p vault/.obsidian/plugins/goku-multi-chat
+          mkdir -p vault/.obsidian/plugins/vegeta-multi-chat
+
+          cp -r ${GOKU_PATH}/dist/* vault/.obsidian/plugins/goku-multi-chat/
+          cp -r ${VEGETA_PATH}/dist/* vault/.obsidian/plugins/vegeta-multi-chat/
+
+          for plugin in goku-multi-chat vegeta-multi-chat; do
+            if [ ! -f "vault/.obsidian/plugins/$plugin/main.js" ]; then
+              echo "main.js missing for $plugin" >&2
+              exit 1
+            fi
+            if [ ! -f "vault/.obsidian/plugins/$plugin/manifest.json" ]; then
+              cp obsidian-ai-chat/mention-test/${plugin^^}/manifest.json vault/.obsidian/plugins/$plugin/
+            fi
+          done
+
+      - name: 📤 Commit and Push to Vault
+        working-directory: ./vault
+        run: |
+          set -e
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git config --global init.defaultBranch main
+
+          git add .obsidian/plugins/goku-multi-chat
+          git add .obsidian/plugins/vegeta-multi-chat
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "feat: update Obsidian plugins
+
+          - GOKU: Multi-chat functionality
+          - VEGETA: Multi-chat functionality
+          "
+
+          for i in 1 2 3; do
+            if git push origin HEAD:${VAULT_BRANCH}; then
+              echo "✅ Pushed to Vault"
+              break
+            else
+              if [ $i -eq 3 ]; then
+                echo "❌ Push failed after 3 attempts"
+                exit 1
+              fi
+              echo "⚠️ Push failed, retrying..."
+              git fetch origin ${VAULT_BRANCH}
+              if git rebase origin/${VAULT_BRANCH}; then
+                echo "✅ Rebase successful"
+              else
+                git rebase --abort
+                git pull origin ${VAULT_BRANCH} --strategy=ours
+              fi
+            fi
+          done
+rn 1
             }
           fi
           
