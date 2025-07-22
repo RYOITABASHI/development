@@ -913,6 +913,32 @@ textarea:focus, select:focus {
 
 /* Custom utilities */
 
+/* Fix outer border clipping (right & bottom) completely */
+.workspace-split.mod-root {
+  margin: 0 4px 4px 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  width: calc(100% - 4px) !important;
+  height: calc(100% - 4px) !important;
+}
+
+.workspace-leaf-content {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
+  border: 2px solid rgba(255, 165, 0, 0.4) !important;
+}
+
+.workspace-tabs {
+  margin-bottom: 2px !important;
+  box-sizing: border-box !important;
+}
+
+.workspace-leaf {
+  margin: 1px !important;
+  box-sizing: border-box !important;
+}
+
 .hover\:bg-blue-800:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(30 64 175 / var(--tw-bg-opacity, 1));
