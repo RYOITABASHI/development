@@ -32,11 +32,22 @@ class GokuMultiModelPlugin extends Plugin {
         try {
             // Mobile-specific initialization with improved timing
             await this.waitForWorkspaceReady();
+            
+            // Additional delay for mobile to ensure all components are loaded
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
             await this.setupChatView();
             this.logToFile('GOKU mobile initialization successful', 'info');
         } catch (error) {
             console.error('GOKU: Mobile setup error:', error);
             this.logToFile(`GOKU mobile initialization failed: ${error.message}`, 'error');
+            
+            // Retry setup after a delay if initial attempt fails
+            setTimeout(() => {
+                this.setupChatView().catch(e => 
+                    console.error('GOKU: Retry failed:', e)
+                );
+            }, 1000);
         }
     }
 
@@ -47,8 +58,12 @@ class GokuMultiModelPlugin extends Plugin {
                 return;
             }
             
+            let attempts = 0;
+            const maxAttempts = 50; // 5 seconds maximum wait
+            
             const checkReady = () => {
-                if (this.app.workspace.layoutReady) {
+                attempts++;
+                if (this.app.workspace.layoutReady || attempts >= maxAttempts) {
                     resolve();
                 } else {
                     setTimeout(checkReady, 100);
