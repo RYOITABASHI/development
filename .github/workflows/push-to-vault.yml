@@ -2,7 +2,8 @@ name: Push to Vault Repository
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths:
       - 'obsidian-ai-chat/mention-test/GOKU/**'
       - 'obsidian-ai-chat/mention-test/VEGETA/**'
@@ -20,47 +21,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🏁 Checkout Development repository
+      - name: Checkout Development repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 📦 Setup Node.js with cache
+      - name: Setup Node.js with cache
         uses: actions/setup-node@v4
         with:
-          node-version: '${{ env.NODE_VERSION }}'
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
           cache-dependency-path: |
             ${{ env.GOKU_PATH }}/package-lock.json
             ${{ env.VEGETA_PATH }}/package-lock.json
 
-      - name: 🔍 Check build prerequisites
+      - name: Check build prerequisites
         id: check-prerequisites
         run: |
-          set -e
+          echo "Checking prerequisites…"
           for plugin in GOKU VEGETA; do
             path="obsidian-ai-chat/mention-test/$plugin"
             if [ ! -f "$path/package.json" ]; then
-              echo "$path/package.json not found" >&2
+              echo "❌ $path/package.json missing"
               exit 1
             fi
             if [ -f "$path/package-lock.json" ]; then
-              echo "has_lock_${plugin}=true" >> $GITHUB_ENV
+              echo "has_lock_$plugin=true" >> $GITHUB_OUTPUT
             else
-              echo "has_lock_${plugin}=false" >> $GITHUB_ENV
+              echo "has_lock_$plugin=false" >> $GITHUB_OUTPUT
             fi
           done
 
-      - name: 🏗️ Build plugins
+      - name: Build plugins
         run: |
-          set -e
           build_plugin() {
             local plugin=$1
             local path="obsidian-ai-chat/mention-test/$plugin"
-            local has_lock_var="has_lock_${plugin}"
+            local has_lock=$2
+
             cd "$GITHUB_WORKSPACE/$path"
 
-            if [ "${!has_lock_var}" = "true" ]; then
+            if [ "$has_lock" = "true" ]; then
               npm ci
             else
               npm install
@@ -68,297 +69,45 @@ jobs:
 
             npm run build
 
-            if [ ! -d "dist" ] || [ ! -f "dist/main.js" ]; then
-              echo "Build failed for $plugin" >&2
+            if [ ! -d dist ]; then
+              echo "❌ dist directory missing"
               exit 1
             fi
-            cd - >/dev/null
           }
 
-          build_plugin GOKU
-          build_plugin VEGETA
+          build_plugin GOKU "${{ steps.check-prerequisites.outputs.has_lock_GOKU }}"
+          build_plugin VEGETA "${{ steps.check-prerequisites.outputs.has_lock_VEGETA }}"
 
-      - name: 📥 Checkout Vault repository
+      - name: Checkout Vault repository
         uses: actions/checkout@v4
         with:
-          repository: '${{ env.VAULT_REPO }}'
+          repository: ${{ env.VAULT_REPO }}
           path: vault
-          token: '${{ secrets.VAULT_PUSH_TOKEN }}'
-          ref: '${{ env.VAULT_BRANCH }}'
+          token: ${{ secrets.VAULT_PUSH_TOKEN }}
+          ref: ${{ env.VAULT_BRANCH }}
           fetch-depth: 0
 
-      - name: 📋 Copy plugins to Vault
+      - name: Copy plugins to Vault
         run: |
-          set -e
           mkdir -p vault/.obsidian/plugins/goku-multi-chat
           mkdir -p vault/.obsidian/plugins/vegeta-multi-chat
 
-          cp -r ${GOKU_PATH}/dist/* vault/.obsidian/plugins/goku-multi-chat/
-          cp -r ${VEGETA_PATH}/dist/* vault/.obsidian/plugins/vegeta-multi-chat/
+          cp -r ${{ env.GOKU_PATH }}/dist/* vault/.obsidian/plugins/goku-multi-chat/
+          cp -r ${{ env.VEGETA_PATH }}/dist/* vault/.obsidian/plugins/vegeta-multi-chat/
 
-          for plugin in goku-multi-chat vegeta-multi-chat; do
-            if [ ! -f "vault/.obsidian/plugins/$plugin/main.js" ]; then
-              echo "main.js missing for $plugin" >&2
-              exit 1
-            fi
-            if [ ! -f "vault/.obsidian/plugins/$plugin/manifest.json" ]; then
-              cp obsidian-ai-chat/mention-test/${plugin^^}/manifest.json vault/.obsidian/plugins/$plugin/
-            fi
-          done
-
-      - name: 📤 Commit and Push to Vault
-        working-directory: ./vault
+      - name: Commit and Push to Vault
+        working-directory: vault
         run: |
-          set -e
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git config --global init.defaultBranch main
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
 
           git add .obsidian/plugins/goku-multi-chat
           git add .obsidian/plugins/vegeta-multi-chat
 
-          if git diff --cached --quiet; then
+          if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
           fi
 
-          git commit -m "feat: update Obsidian plugins
-
-          - GOKU: Multi-chat functionality
-          - VEGETA: Multi-chat functionality
-          "
-
-          for i in 1 2 3; do
-            if git push origin HEAD:${VAULT_BRANCH}; then
-              echo "✅ Pushed to Vault"
-              break
-            else
-              if [ $i -eq 3 ]; then
-                echo "❌ Push failed after 3 attempts"
-                exit 1
-              fi
-              echo "⚠️ Push failed, retrying..."
-              git fetch origin ${VAULT_BRANCH}
-              if git rebase origin/${VAULT_BRANCH}; then
-                echo "✅ Rebase successful"
-              else
-                git rebase --abort
-                git pull origin ${VAULT_BRANCH} --strategy=ours
-              fi
-            fi
-          done
-rn 1
-            }
-          fi
-          
-          # ビルド実行
-          echo "🔨 [$plugin] ビルドを実行中..."
-          npm run build || {
-            echo "❌ [$plugin] ビルドが失敗しました"
-            return 1
-          }
-          
-          # distディレクトリの確認
-          if [ ! -d "dist" ]; then
-            echo "❌ [$plugin] ビルド後に dist ディレクトリが作成されませんでした"
-            return 1
-          fi
-          
-          # 必須ファイルの確認
-          if [ ! -f "dist/main.js" ]; then
-            echo "❌ [$plugin] dist に main.js が見つかりません"
-            return 1
-          fi
-          
-          echo "✅ [$plugin] ビルドが正常に完了しました"
-          return 0
-        }
-        
-        # 並列ビルドの実行
-        echo "🚀 並列ビルドを開始..."
-        
-        # GOKUビルド
-        (build_plugin "GOKU" "${{ steps.check-prerequisites.outputs.has_lock_GOKU }}") &
-        GOKU_PID=$!
-        
-        # VEGETAビルド
-        (build_plugin "VEGETA" "${{ steps.check-prerequisites.outputs.has_lock_VEGETA }}") &
-        VEGETA_PID=$!
-        
-        # 結果の収集
-        GOKU_RESULT=0
-        VEGETA_RESULT=0
-        
-        wait $GOKU_PID || GOKU_RESULT=$?
-        wait $VEGETA_PID || VEGETA_RESULT=$?
-        
-        # エラーチェック
-        if [ $GOKU_RESULT -ne 0 ] || [ $VEGETA_RESULT -ne 0 ]; then
-          echo "❌ ビルドが失敗しました！"
-          [ $GOKU_RESULT -ne 0 ] && echo "  - GOKU ビルドが終了コード $GOKU_RESULT で失敗"
-          [ $VEGETA_RESULT -ne 0 ] && echo "  - VEGETA ビルドが終了コード $VEGETA_RESULT で失敗"
-          exit 1
-        fi
-        
-        echo "✅ すべてのビルドが正常に完了しました！"
-        
-    - name: 🔍 Verify build outputs
-      run: |
-        set -e
-        echo "🔍 ビルド出力を検証中..."
-        
-        for plugin in GOKU VEGETA; do
-          path="obsidian-ai-chat/mention-test/$plugin"
-          
-          # distディレクトリの内容確認
-          echo "📁 [$plugin] dist ディレクトリの内容:"
-          ls -la "$path/dist/" || {
-            echo "❌ [$plugin] dist ディレクトリの一覧取得に失敗"
-            exit 1
-          }
-          
-          # manifest.jsonの存在確認（distまたはルート）
-          if [ -f "$path/dist/manifest.json" ]; then
-            echo "✅ [$plugin] manifest.json が dist に見つかりました"
-          elif [ -f "$path/manifest.json" ]; then
-            echo "✅ [$plugin] manifest.json がルートに見つかりました"
-          else
-            echo "❌ [$plugin] manifest.json が見つかりません"
-            exit 1
-          fi
-        done
-        
-    - name: 📥 Checkout Vault repository
-      uses: actions/checkout@v4
-      with:
-        repository: ${{ env.VAULT_REPO }}
-        path: vault
-        token: ${{ secrets.VAULT_PUSH_TOKEN }}
-        ref: ${{ env.VAULT_BRANCH }}
-        fetch-depth: 0  # rebase用に完全な履歴を取得
-        
-    - name: 📋 Copy plugins to Vault
-      run: |
-        set -e
-        echo "📋 プラグインを Vault リポジトリにコピー中..."
-        
-        # プラグインディレクトリの作成
-        mkdir -p vault/.obsidian/plugins/goku-multi-chat
-        mkdir -p vault/.obsidian/plugins/vegeta-multi-chat
-        
-        # GOKUのコピー
-        echo "📋 GOKU プラグインをコピー中..."
-        cp -r "${{ env.GOKU_PATH }}/dist/"* vault/.obsidian/plugins/goku-multi-chat/
-        
-        # GOKUのmanifest.jsonが無い場合はルートからコピー
-        if [ ! -f vault/.obsidian/plugins/goku-multi-chat/manifest.json ]; then
-          if [ -f "${{ env.GOKU_PATH }}/manifest.json" ]; then
-            cp "${{ env.GOKU_PATH }}/manifest.json" vault/.obsidian/plugins/goku-multi-chat/
-            echo "✅ GOKU の manifest.json をルートからコピーしました"
-          fi
-        fi
-        
-        # VEGETAのコピー
-        echo "📋 VEGETA プラグインをコピー中..."
-        cp -r "${{ env.VEGETA_PATH }}/dist/"* vault/.obsidian/plugins/vegeta-multi-chat/
-        
-        # VEGETAのmanifest.jsonが無い場合はルートからコピー
-        if [ ! -f vault/.obsidian/plugins/vegeta-multi-chat/manifest.json ]; then
-          if [ -f "${{ env.VEGETA_PATH }}/manifest.json" ]; then
-            cp "${{ env.VEGETA_PATH }}/manifest.json" vault/.obsidian/plugins/vegeta-multi-chat/
-            echo "✅ VEGETA の manifest.json をルートからコピーしました"
-          fi
-        fi
-        
-        # 最終確認
-        echo "🔍 最終確認..."
-        for plugin in goku-multi-chat vegeta-multi-chat; do
-          for file in main.js manifest.json; do
-            if [ ! -f "vault/.obsidian/plugins/$plugin/$file" ]; then
-              echo "❌ 必須ファイル $file が $plugin にありません"
-              exit 1
-            fi
-          done
-          echo "✅ $plugin: すべての必須ファイルが存在します"
-        done
-        
-    - name: 📤 Commit and Push to Vault
-      working-directory: ./vault
-      run: |
-        set -e
-        
-        # Git設定
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git config --global init.defaultBranch main
-        
-        echo "📊 Git ステータス:"
-        git status
-        
-        # 変更をステージング
-        git add .obsidian/plugins/goku-multi-chat
-        git add .obsidian/plugins/vegeta-multi-chat
-        
-        # 変更があるかチェック
-        if git diff --staged --quiet; then
-          echo "ℹ️  コミットする変更はありません"
-          exit 0
-        fi
-        
-        echo "📝 コミットする変更:"
-        git diff --staged --name-status
-        
-        # コミットメッセージの作成
-        COMMIT_MSG="feat: update Obsidian plugins
-
-Updated GOKU and VEGETA plugins from development repository
-- GOKU: Multi-chat functionality  
-- VEGETA: Multi-chat functionality"
-        
-        # コミット
-        git commit -m "$COMMIT_MSG"
-        
-        # プッシュ（リトライ機能付き）
-        echo "📤 変更をプッシュ中..."
-        
-        # 最大3回リトライ
-        for i in 1 2 3; do
-          if git push origin HEAD:${{ env.VAULT_BRANCH }}; then
-            echo "✅ Vault リポジトリへのプッシュが成功しました！"
-            break
-          else
-            if [ $i -eq 3 ]; then
-              echo "❌ 3回の試行後もプッシュに失敗しました"
-              exit 1
-            fi
-            
-            echo "⚠️  プッシュが失敗しました (試行 $i/3)、競合の解決を試みます..."
-            
-            # 最新の変更を取得してrebase
-            git fetch origin ${{ env.VAULT_BRANCH }}
-            
-            if git rebase origin/${{ env.VAULT_BRANCH }}; then
-              echo "✅ リベースが成功しました、プッシュを再試行します..."
-            else
-              echo "❌ リベースが失敗しました、マージ戦略を試みます..."
-              git rebase --abort
-              git pull origin ${{ env.VAULT_BRANCH }} --strategy=ours
-            fi
-          fi
-        done
-        
-    - name: 📊 Summary
-      if: always()
-      run: |
-        echo "📊 ワークフローのサマリー"
-        echo "=================="
-        echo "リポジトリ: ${{ github.repository }}"
-        echo "コミット: ${{ github.sha }}"
-        echo "トリガー: ${{ github.event_name }}"
-        echo "ターゲット Vault: ${{ env.VAULT_REPO }}@${{ env.VAULT_BRANCH }}"
-        
-        if [ "${{ job.status }}" == "success" ]; then
-          echo "✅ ステータス: 成功"
-        else
-          echo "❌ ステータス: 失敗"
-        fi
+          git commit -m "Update plugins from development repo"
+          git push origin HEAD:${{ env.VAULT_BRANCH }}
