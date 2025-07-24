@@ -3,14 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-	plugins: [react({
-		jsxRuntime: 'classic',
-		babel: {
-			parserOpts: {
-				plugins: ['decorators-legacy']
-			}
-		}
-	})],
+	plugins: [react()],
 	css: {
 		postcss: './postcss.config.js',
 	},
@@ -18,7 +11,7 @@ export default defineConfig({
 		outDir: "dist",
 		emptyOutDir: false,
 		sourcemap: false,
-		target: "es2015",
+		target: "es2018",
 		minify: false,
 		lib: {
 			entry: path.resolve(__dirname, "src/main.tsx"),

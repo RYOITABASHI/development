@@ -1,62 +1,10 @@
 "use strict";
-var __defProp = Object.defineProperty;
-var __defProps = Object.defineProperties;
-var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __spreadValues = (a, b) => {
-  for (var prop in b || (b = {}))
-    if (__hasOwnProp.call(b, prop))
-      __defNormalProp(a, prop, b[prop]);
-  if (__getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(b)) {
-      if (__propIsEnum.call(b, prop))
-        __defNormalProp(a, prop, b[prop]);
-    }
-  return a;
-};
-var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
-var __objRest = (source, exclude) => {
-  var target = {};
-  for (var prop in source)
-    if (__hasOwnProp.call(source, prop) && exclude.indexOf(prop) < 0)
-      target[prop] = source[prop];
-  if (source != null && __getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(source)) {
-      if (exclude.indexOf(prop) < 0 && __propIsEnum.call(source, prop))
-        target[prop] = source[prop];
-    }
-  return target;
-};
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 const obsidian = require("obsidian");
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
-var client = {};
-var reactDom = { exports: {} };
-var reactDom_production_min = {};
+var jsxRuntime = { exports: {} };
+var reactJsxRuntime_production_min = {};
 var react = { exports: {} };
 var react_production_min = {};
 /**
@@ -2242,6 +2190,949 @@ if (process.env.NODE_ENV === "production") {
 }
 var reactExports = react.exports;
 const React = /* @__PURE__ */ getDefaultExportFromCjs(reactExports);
+/**
+ * @license React
+ * react-jsx-runtime.production.min.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+var hasRequiredReactJsxRuntime_production_min;
+function requireReactJsxRuntime_production_min() {
+  if (hasRequiredReactJsxRuntime_production_min)
+    return reactJsxRuntime_production_min;
+  hasRequiredReactJsxRuntime_production_min = 1;
+  var f = reactExports, k = Symbol.for("react.element"), l = Symbol.for("react.fragment"), m2 = Object.prototype.hasOwnProperty, n = f.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, p = { key: true, ref: true, __self: true, __source: true };
+  function q(c, a, g) {
+    var b, d = {}, e = null, h = null;
+    void 0 !== g && (e = "" + g);
+    void 0 !== a.key && (e = "" + a.key);
+    void 0 !== a.ref && (h = a.ref);
+    for (b in a)
+      m2.call(a, b) && !p.hasOwnProperty(b) && (d[b] = a[b]);
+    if (c && c.defaultProps)
+      for (b in a = c.defaultProps, a)
+        void 0 === d[b] && (d[b] = a[b]);
+    return { $$typeof: k, type: c, key: e, ref: h, props: d, _owner: n.current };
+  }
+  reactJsxRuntime_production_min.Fragment = l;
+  reactJsxRuntime_production_min.jsx = q;
+  reactJsxRuntime_production_min.jsxs = q;
+  return reactJsxRuntime_production_min;
+}
+var reactJsxRuntime_development = {};
+/**
+ * @license React
+ * react-jsx-runtime.development.js
+ *
+ * Copyright (c) Facebook, Inc. and its affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+var hasRequiredReactJsxRuntime_development;
+function requireReactJsxRuntime_development() {
+  if (hasRequiredReactJsxRuntime_development)
+    return reactJsxRuntime_development;
+  hasRequiredReactJsxRuntime_development = 1;
+  if (process.env.NODE_ENV !== "production") {
+    (function() {
+      var React2 = reactExports;
+      var REACT_ELEMENT_TYPE = Symbol.for("react.element");
+      var REACT_PORTAL_TYPE = Symbol.for("react.portal");
+      var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
+      var REACT_STRICT_MODE_TYPE = Symbol.for("react.strict_mode");
+      var REACT_PROFILER_TYPE = Symbol.for("react.profiler");
+      var REACT_PROVIDER_TYPE = Symbol.for("react.provider");
+      var REACT_CONTEXT_TYPE = Symbol.for("react.context");
+      var REACT_FORWARD_REF_TYPE = Symbol.for("react.forward_ref");
+      var REACT_SUSPENSE_TYPE = Symbol.for("react.suspense");
+      var REACT_SUSPENSE_LIST_TYPE = Symbol.for("react.suspense_list");
+      var REACT_MEMO_TYPE = Symbol.for("react.memo");
+      var REACT_LAZY_TYPE = Symbol.for("react.lazy");
+      var REACT_OFFSCREEN_TYPE = Symbol.for("react.offscreen");
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator;
+      var FAUX_ITERATOR_SYMBOL = "@@iterator";
+      function getIteratorFn(maybeIterable) {
+        if (maybeIterable === null || typeof maybeIterable !== "object") {
+          return null;
+        }
+        var maybeIterator = MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL];
+        if (typeof maybeIterator === "function") {
+          return maybeIterator;
+        }
+        return null;
+      }
+      var ReactSharedInternals = React2.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+      function error(format) {
+        {
+          {
+            for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+              args[_key2 - 1] = arguments[_key2];
+            }
+            printWarning("error", format, args);
+          }
+        }
+      }
+      function printWarning(level, format, args) {
+        {
+          var ReactDebugCurrentFrame2 = ReactSharedInternals.ReactDebugCurrentFrame;
+          var stack = ReactDebugCurrentFrame2.getStackAddendum();
+          if (stack !== "") {
+            format += "%s";
+            args = args.concat([stack]);
+          }
+          var argsWithFormat = args.map(function(item) {
+            return String(item);
+          });
+          argsWithFormat.unshift("Warning: " + format);
+          Function.prototype.apply.call(console[level], console, argsWithFormat);
+        }
+      }
+      var enableScopeAPI = false;
+      var enableCacheElement = false;
+      var enableTransitionTracing = false;
+      var enableLegacyHidden = false;
+      var enableDebugTracing = false;
+      var REACT_MODULE_REFERENCE;
+      {
+        REACT_MODULE_REFERENCE = Symbol.for("react.module.reference");
+      }
+      function isValidElementType(type) {
+        if (typeof type === "string" || typeof type === "function") {
+          return true;
+        }
+        if (type === REACT_FRAGMENT_TYPE || type === REACT_PROFILER_TYPE || enableDebugTracing || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || type === REACT_SUSPENSE_LIST_TYPE || enableLegacyHidden || type === REACT_OFFSCREEN_TYPE || enableScopeAPI || enableCacheElement || enableTransitionTracing) {
+          return true;
+        }
+        if (typeof type === "object" && type !== null) {
+          if (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE || // This needs to include all possible module reference object
+          // types supported by any Flight configuration anywhere since
+          // we don't know which Flight build this will end up being used
+          // with.
+          type.$$typeof === REACT_MODULE_REFERENCE || type.getModuleId !== void 0) {
+            return true;
+          }
+        }
+        return false;
+      }
+      function getWrappedName(outerType, innerType, wrapperName) {
+        var displayName = outerType.displayName;
+        if (displayName) {
+          return displayName;
+        }
+        var functionName = innerType.displayName || innerType.name || "";
+        return functionName !== "" ? wrapperName + "(" + functionName + ")" : wrapperName;
+      }
+      function getContextName(type) {
+        return type.displayName || "Context";
+      }
+      function getComponentNameFromType(type) {
+        if (type == null) {
+          return null;
+        }
+        {
+          if (typeof type.tag === "number") {
+            error("Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue.");
+          }
+        }
+        if (typeof type === "function") {
+          return type.displayName || type.name || null;
+        }
+        if (typeof type === "string") {
+          return type;
+        }
+        switch (type) {
+          case REACT_FRAGMENT_TYPE:
+            return "Fragment";
+          case REACT_PORTAL_TYPE:
+            return "Portal";
+          case REACT_PROFILER_TYPE:
+            return "Profiler";
+          case REACT_STRICT_MODE_TYPE:
+            return "StrictMode";
+          case REACT_SUSPENSE_TYPE:
+            return "Suspense";
+          case REACT_SUSPENSE_LIST_TYPE:
+            return "SuspenseList";
+        }
+        if (typeof type === "object") {
+          switch (type.$$typeof) {
+            case REACT_CONTEXT_TYPE:
+              var context = type;
+              return getContextName(context) + ".Consumer";
+            case REACT_PROVIDER_TYPE:
+              var provider = type;
+              return getContextName(provider._context) + ".Provider";
+            case REACT_FORWARD_REF_TYPE:
+              return getWrappedName(type, type.render, "ForwardRef");
+            case REACT_MEMO_TYPE:
+              var outerName = type.displayName || null;
+              if (outerName !== null) {
+                return outerName;
+              }
+              return getComponentNameFromType(type.type) || "Memo";
+            case REACT_LAZY_TYPE: {
+              var lazyComponent = type;
+              var payload = lazyComponent._payload;
+              var init = lazyComponent._init;
+              try {
+                return getComponentNameFromType(init(payload));
+              } catch (x) {
+                return null;
+              }
+            }
+          }
+        }
+        return null;
+      }
+      var assign = Object.assign;
+      var disabledDepth = 0;
+      var prevLog;
+      var prevInfo;
+      var prevWarn;
+      var prevError;
+      var prevGroup;
+      var prevGroupCollapsed;
+      var prevGroupEnd;
+      function disabledLog() {
+      }
+      disabledLog.__reactDisabledLog = true;
+      function disableLogs() {
+        {
+          if (disabledDepth === 0) {
+            prevLog = console.log;
+            prevInfo = console.info;
+            prevWarn = console.warn;
+            prevError = console.error;
+            prevGroup = console.group;
+            prevGroupCollapsed = console.groupCollapsed;
+            prevGroupEnd = console.groupEnd;
+            var props = {
+              configurable: true,
+              enumerable: true,
+              value: disabledLog,
+              writable: true
+            };
+            Object.defineProperties(console, {
+              info: props,
+              log: props,
+              warn: props,
+              error: props,
+              group: props,
+              groupCollapsed: props,
+              groupEnd: props
+            });
+          }
+          disabledDepth++;
+        }
+      }
+      function reenableLogs() {
+        {
+          disabledDepth--;
+          if (disabledDepth === 0) {
+            var props = {
+              configurable: true,
+              enumerable: true,
+              writable: true
+            };
+            Object.defineProperties(console, {
+              log: assign({}, props, {
+                value: prevLog
+              }),
+              info: assign({}, props, {
+                value: prevInfo
+              }),
+              warn: assign({}, props, {
+                value: prevWarn
+              }),
+              error: assign({}, props, {
+                value: prevError
+              }),
+              group: assign({}, props, {
+                value: prevGroup
+              }),
+              groupCollapsed: assign({}, props, {
+                value: prevGroupCollapsed
+              }),
+              groupEnd: assign({}, props, {
+                value: prevGroupEnd
+              })
+            });
+          }
+          if (disabledDepth < 0) {
+            error("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
+          }
+        }
+      }
+      var ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
+      var prefix;
+      function describeBuiltInComponentFrame(name, source, ownerFn) {
+        {
+          if (prefix === void 0) {
+            try {
+              throw Error();
+            } catch (x) {
+              var match = x.stack.trim().match(/\n( *(at )?)/);
+              prefix = match && match[1] || "";
+            }
+          }
+          return "\n" + prefix + name;
+        }
+      }
+      var reentry = false;
+      var componentFrameCache;
+      {
+        var PossiblyWeakMap = typeof WeakMap === "function" ? WeakMap : Map;
+        componentFrameCache = new PossiblyWeakMap();
+      }
+      function describeNativeComponentFrame(fn, construct) {
+        if (!fn || reentry) {
+          return "";
+        }
+        {
+          var frame = componentFrameCache.get(fn);
+          if (frame !== void 0) {
+            return frame;
+          }
+        }
+        var control;
+        reentry = true;
+        var previousPrepareStackTrace = Error.prepareStackTrace;
+        Error.prepareStackTrace = void 0;
+        var previousDispatcher;
+        {
+          previousDispatcher = ReactCurrentDispatcher.current;
+          ReactCurrentDispatcher.current = null;
+          disableLogs();
+        }
+        try {
+          if (construct) {
+            var Fake = function() {
+              throw Error();
+            };
+            Object.defineProperty(Fake.prototype, "props", {
+              set: function() {
+                throw Error();
+              }
+            });
+            if (typeof Reflect === "object" && Reflect.construct) {
+              try {
+                Reflect.construct(Fake, []);
+              } catch (x) {
+                control = x;
+              }
+              Reflect.construct(fn, [], Fake);
+            } else {
+              try {
+                Fake.call();
+              } catch (x) {
+                control = x;
+              }
+              fn.call(Fake.prototype);
+            }
+          } else {
+            try {
+              throw Error();
+            } catch (x) {
+              control = x;
+            }
+            fn();
+          }
+        } catch (sample) {
+          if (sample && control && typeof sample.stack === "string") {
+            var sampleLines = sample.stack.split("\n");
+            var controlLines = control.stack.split("\n");
+            var s = sampleLines.length - 1;
+            var c = controlLines.length - 1;
+            while (s >= 1 && c >= 0 && sampleLines[s] !== controlLines[c]) {
+              c--;
+            }
+            for (; s >= 1 && c >= 0; s--, c--) {
+              if (sampleLines[s] !== controlLines[c]) {
+                if (s !== 1 || c !== 1) {
+                  do {
+                    s--;
+                    c--;
+                    if (c < 0 || sampleLines[s] !== controlLines[c]) {
+                      var _frame = "\n" + sampleLines[s].replace(" at new ", " at ");
+                      if (fn.displayName && _frame.includes("<anonymous>")) {
+                        _frame = _frame.replace("<anonymous>", fn.displayName);
+                      }
+                      {
+                        if (typeof fn === "function") {
+                          componentFrameCache.set(fn, _frame);
+                        }
+                      }
+                      return _frame;
+                    }
+                  } while (s >= 1 && c >= 0);
+                }
+                break;
+              }
+            }
+          }
+        } finally {
+          reentry = false;
+          {
+            ReactCurrentDispatcher.current = previousDispatcher;
+            reenableLogs();
+          }
+          Error.prepareStackTrace = previousPrepareStackTrace;
+        }
+        var name = fn ? fn.displayName || fn.name : "";
+        var syntheticFrame = name ? describeBuiltInComponentFrame(name) : "";
+        {
+          if (typeof fn === "function") {
+            componentFrameCache.set(fn, syntheticFrame);
+          }
+        }
+        return syntheticFrame;
+      }
+      function describeFunctionComponentFrame(fn, source, ownerFn) {
+        {
+          return describeNativeComponentFrame(fn, false);
+        }
+      }
+      function shouldConstruct(Component) {
+        var prototype = Component.prototype;
+        return !!(prototype && prototype.isReactComponent);
+      }
+      function describeUnknownElementTypeFrameInDEV(type, source, ownerFn) {
+        if (type == null) {
+          return "";
+        }
+        if (typeof type === "function") {
+          {
+            return describeNativeComponentFrame(type, shouldConstruct(type));
+          }
+        }
+        if (typeof type === "string") {
+          return describeBuiltInComponentFrame(type);
+        }
+        switch (type) {
+          case REACT_SUSPENSE_TYPE:
+            return describeBuiltInComponentFrame("Suspense");
+          case REACT_SUSPENSE_LIST_TYPE:
+            return describeBuiltInComponentFrame("SuspenseList");
+        }
+        if (typeof type === "object") {
+          switch (type.$$typeof) {
+            case REACT_FORWARD_REF_TYPE:
+              return describeFunctionComponentFrame(type.render);
+            case REACT_MEMO_TYPE:
+              return describeUnknownElementTypeFrameInDEV(type.type, source, ownerFn);
+            case REACT_LAZY_TYPE: {
+              var lazyComponent = type;
+              var payload = lazyComponent._payload;
+              var init = lazyComponent._init;
+              try {
+                return describeUnknownElementTypeFrameInDEV(init(payload), source, ownerFn);
+              } catch (x) {
+              }
+            }
+          }
+        }
+        return "";
+      }
+      var hasOwnProperty = Object.prototype.hasOwnProperty;
+      var loggedTypeFailures = {};
+      var ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;
+      function setCurrentlyValidatingElement(element) {
+        {
+          if (element) {
+            var owner = element._owner;
+            var stack = describeUnknownElementTypeFrameInDEV(element.type, element._source, owner ? owner.type : null);
+            ReactDebugCurrentFrame.setExtraStackFrame(stack);
+          } else {
+            ReactDebugCurrentFrame.setExtraStackFrame(null);
+          }
+        }
+      }
+      function checkPropTypes(typeSpecs, values, location, componentName, element) {
+        {
+          var has = Function.call.bind(hasOwnProperty);
+          for (var typeSpecName in typeSpecs) {
+            if (has(typeSpecs, typeSpecName)) {
+              var error$1 = void 0;
+              try {
+                if (typeof typeSpecs[typeSpecName] !== "function") {
+                  var err = Error((componentName || "React class") + ": " + location + " type `" + typeSpecName + "` is invalid; it must be a function, usually from the `prop-types` package, but received `" + typeof typeSpecs[typeSpecName] + "`.This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.");
+                  err.name = "Invariant Violation";
+                  throw err;
+                }
+                error$1 = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, "SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED");
+              } catch (ex) {
+                error$1 = ex;
+              }
+              if (error$1 && !(error$1 instanceof Error)) {
+                setCurrentlyValidatingElement(element);
+                error("%s: type specification of %s `%s` is invalid; the type checker function must return `null` or an `Error` but returned a %s. You may have forgotten to pass an argument to the type checker creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and shape all require an argument).", componentName || "React class", location, typeSpecName, typeof error$1);
+                setCurrentlyValidatingElement(null);
+              }
+              if (error$1 instanceof Error && !(error$1.message in loggedTypeFailures)) {
+                loggedTypeFailures[error$1.message] = true;
+                setCurrentlyValidatingElement(element);
+                error("Failed %s type: %s", location, error$1.message);
+                setCurrentlyValidatingElement(null);
+              }
+            }
+          }
+        }
+      }
+      var isArrayImpl = Array.isArray;
+      function isArray(a) {
+        return isArrayImpl(a);
+      }
+      function typeName(value) {
+        {
+          var hasToStringTag = typeof Symbol === "function" && Symbol.toStringTag;
+          var type = hasToStringTag && value[Symbol.toStringTag] || value.constructor.name || "Object";
+          return type;
+        }
+      }
+      function willCoercionThrow(value) {
+        {
+          try {
+            testStringCoercion(value);
+            return false;
+          } catch (e) {
+            return true;
+          }
+        }
+      }
+      function testStringCoercion(value) {
+        return "" + value;
+      }
+      function checkKeyStringCoercion(value) {
+        {
+          if (willCoercionThrow(value)) {
+            error("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", typeName(value));
+            return testStringCoercion(value);
+          }
+        }
+      }
+      var ReactCurrentOwner = ReactSharedInternals.ReactCurrentOwner;
+      var RESERVED_PROPS = {
+        key: true,
+        ref: true,
+        __self: true,
+        __source: true
+      };
+      var specialPropKeyWarningShown;
+      var specialPropRefWarningShown;
+      var didWarnAboutStringRefs;
+      {
+        didWarnAboutStringRefs = {};
+      }
+      function hasValidRef(config) {
+        {
+          if (hasOwnProperty.call(config, "ref")) {
+            var getter = Object.getOwnPropertyDescriptor(config, "ref").get;
+            if (getter && getter.isReactWarning) {
+              return false;
+            }
+          }
+        }
+        return config.ref !== void 0;
+      }
+      function hasValidKey(config) {
+        {
+          if (hasOwnProperty.call(config, "key")) {
+            var getter = Object.getOwnPropertyDescriptor(config, "key").get;
+            if (getter && getter.isReactWarning) {
+              return false;
+            }
+          }
+        }
+        return config.key !== void 0;
+      }
+      function warnIfStringRefCannotBeAutoConverted(config, self) {
+        {
+          if (typeof config.ref === "string" && ReactCurrentOwner.current && self && ReactCurrentOwner.current.stateNode !== self) {
+            var componentName = getComponentNameFromType(ReactCurrentOwner.current.type);
+            if (!didWarnAboutStringRefs[componentName]) {
+              error('Component "%s" contains the string ref "%s". Support for string refs will be removed in a future major release. This case cannot be automatically converted to an arrow function. We ask you to manually fix this case by using useRef() or createRef() instead. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-string-ref', getComponentNameFromType(ReactCurrentOwner.current.type), config.ref);
+              didWarnAboutStringRefs[componentName] = true;
+            }
+          }
+        }
+      }
+      function defineKeyPropWarningGetter(props, displayName) {
+        {
+          var warnAboutAccessingKey = function() {
+            if (!specialPropKeyWarningShown) {
+              specialPropKeyWarningShown = true;
+              error("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", displayName);
+            }
+          };
+          warnAboutAccessingKey.isReactWarning = true;
+          Object.defineProperty(props, "key", {
+            get: warnAboutAccessingKey,
+            configurable: true
+          });
+        }
+      }
+      function defineRefPropWarningGetter(props, displayName) {
+        {
+          var warnAboutAccessingRef = function() {
+            if (!specialPropRefWarningShown) {
+              specialPropRefWarningShown = true;
+              error("%s: `ref` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", displayName);
+            }
+          };
+          warnAboutAccessingRef.isReactWarning = true;
+          Object.defineProperty(props, "ref", {
+            get: warnAboutAccessingRef,
+            configurable: true
+          });
+        }
+      }
+      var ReactElement = function(type, key, ref, self, source, owner, props) {
+        var element = {
+          // This tag allows us to uniquely identify this as a React Element
+          $$typeof: REACT_ELEMENT_TYPE,
+          // Built-in properties that belong on the element
+          type,
+          key,
+          ref,
+          props,
+          // Record the component responsible for creating this element.
+          _owner: owner
+        };
+        {
+          element._store = {};
+          Object.defineProperty(element._store, "validated", {
+            configurable: false,
+            enumerable: false,
+            writable: true,
+            value: false
+          });
+          Object.defineProperty(element, "_self", {
+            configurable: false,
+            enumerable: false,
+            writable: false,
+            value: self
+          });
+          Object.defineProperty(element, "_source", {
+            configurable: false,
+            enumerable: false,
+            writable: false,
+            value: source
+          });
+          if (Object.freeze) {
+            Object.freeze(element.props);
+            Object.freeze(element);
+          }
+        }
+        return element;
+      };
+      function jsxDEV(type, config, maybeKey, source, self) {
+        {
+          var propName;
+          var props = {};
+          var key = null;
+          var ref = null;
+          if (maybeKey !== void 0) {
+            {
+              checkKeyStringCoercion(maybeKey);
+            }
+            key = "" + maybeKey;
+          }
+          if (hasValidKey(config)) {
+            {
+              checkKeyStringCoercion(config.key);
+            }
+            key = "" + config.key;
+          }
+          if (hasValidRef(config)) {
+            ref = config.ref;
+            warnIfStringRefCannotBeAutoConverted(config, self);
+          }
+          for (propName in config) {
+            if (hasOwnProperty.call(config, propName) && !RESERVED_PROPS.hasOwnProperty(propName)) {
+              props[propName] = config[propName];
+            }
+          }
+          if (type && type.defaultProps) {
+            var defaultProps = type.defaultProps;
+            for (propName in defaultProps) {
+              if (props[propName] === void 0) {
+                props[propName] = defaultProps[propName];
+              }
+            }
+          }
+          if (key || ref) {
+            var displayName = typeof type === "function" ? type.displayName || type.name || "Unknown" : type;
+            if (key) {
+              defineKeyPropWarningGetter(props, displayName);
+            }
+            if (ref) {
+              defineRefPropWarningGetter(props, displayName);
+            }
+          }
+          return ReactElement(type, key, ref, self, source, ReactCurrentOwner.current, props);
+        }
+      }
+      var ReactCurrentOwner$1 = ReactSharedInternals.ReactCurrentOwner;
+      var ReactDebugCurrentFrame$1 = ReactSharedInternals.ReactDebugCurrentFrame;
+      function setCurrentlyValidatingElement$1(element) {
+        {
+          if (element) {
+            var owner = element._owner;
+            var stack = describeUnknownElementTypeFrameInDEV(element.type, element._source, owner ? owner.type : null);
+            ReactDebugCurrentFrame$1.setExtraStackFrame(stack);
+          } else {
+            ReactDebugCurrentFrame$1.setExtraStackFrame(null);
+          }
+        }
+      }
+      var propTypesMisspellWarningShown;
+      {
+        propTypesMisspellWarningShown = false;
+      }
+      function isValidElement(object) {
+        {
+          return typeof object === "object" && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;
+        }
+      }
+      function getDeclarationErrorAddendum() {
+        {
+          if (ReactCurrentOwner$1.current) {
+            var name = getComponentNameFromType(ReactCurrentOwner$1.current.type);
+            if (name) {
+              return "\n\nCheck the render method of `" + name + "`.";
+            }
+          }
+          return "";
+        }
+      }
+      function getSourceInfoErrorAddendum(source) {
+        {
+          if (source !== void 0) {
+            var fileName = source.fileName.replace(/^.*[\\\/]/, "");
+            var lineNumber = source.lineNumber;
+            return "\n\nCheck your code at " + fileName + ":" + lineNumber + ".";
+          }
+          return "";
+        }
+      }
+      var ownerHasKeyUseWarning = {};
+      function getCurrentComponentErrorInfo(parentType) {
+        {
+          var info = getDeclarationErrorAddendum();
+          if (!info) {
+            var parentName = typeof parentType === "string" ? parentType : parentType.displayName || parentType.name;
+            if (parentName) {
+              info = "\n\nCheck the top-level render call using <" + parentName + ">.";
+            }
+          }
+          return info;
+        }
+      }
+      function validateExplicitKey(element, parentType) {
+        {
+          if (!element._store || element._store.validated || element.key != null) {
+            return;
+          }
+          element._store.validated = true;
+          var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);
+          if (ownerHasKeyUseWarning[currentComponentErrorInfo]) {
+            return;
+          }
+          ownerHasKeyUseWarning[currentComponentErrorInfo] = true;
+          var childOwner = "";
+          if (element && element._owner && element._owner !== ReactCurrentOwner$1.current) {
+            childOwner = " It was passed a child from " + getComponentNameFromType(element._owner.type) + ".";
+          }
+          setCurrentlyValidatingElement$1(element);
+          error('Each child in a list should have a unique "key" prop.%s%s See https://reactjs.org/link/warning-keys for more information.', currentComponentErrorInfo, childOwner);
+          setCurrentlyValidatingElement$1(null);
+        }
+      }
+      function validateChildKeys(node, parentType) {
+        {
+          if (typeof node !== "object") {
+            return;
+          }
+          if (isArray(node)) {
+            for (var i = 0; i < node.length; i++) {
+              var child = node[i];
+              if (isValidElement(child)) {
+                validateExplicitKey(child, parentType);
+              }
+            }
+          } else if (isValidElement(node)) {
+            if (node._store) {
+              node._store.validated = true;
+            }
+          } else if (node) {
+            var iteratorFn = getIteratorFn(node);
+            if (typeof iteratorFn === "function") {
+              if (iteratorFn !== node.entries) {
+                var iterator = iteratorFn.call(node);
+                var step;
+                while (!(step = iterator.next()).done) {
+                  if (isValidElement(step.value)) {
+                    validateExplicitKey(step.value, parentType);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      function validatePropTypes(element) {
+        {
+          var type = element.type;
+          if (type === null || type === void 0 || typeof type === "string") {
+            return;
+          }
+          var propTypes;
+          if (typeof type === "function") {
+            propTypes = type.propTypes;
+          } else if (typeof type === "object" && (type.$$typeof === REACT_FORWARD_REF_TYPE || // Note: Memo only checks outer props here.
+          // Inner props are checked in the reconciler.
+          type.$$typeof === REACT_MEMO_TYPE)) {
+            propTypes = type.propTypes;
+          } else {
+            return;
+          }
+          if (propTypes) {
+            var name = getComponentNameFromType(type);
+            checkPropTypes(propTypes, element.props, "prop", name, element);
+          } else if (type.PropTypes !== void 0 && !propTypesMisspellWarningShown) {
+            propTypesMisspellWarningShown = true;
+            var _name = getComponentNameFromType(type);
+            error("Component %s declared `PropTypes` instead of `propTypes`. Did you misspell the property assignment?", _name || "Unknown");
+          }
+          if (typeof type.getDefaultProps === "function" && !type.getDefaultProps.isReactClassApproved) {
+            error("getDefaultProps is only used on classic React.createClass definitions. Use a static property named `defaultProps` instead.");
+          }
+        }
+      }
+      function validateFragmentProps(fragment) {
+        {
+          var keys = Object.keys(fragment.props);
+          for (var i = 0; i < keys.length; i++) {
+            var key = keys[i];
+            if (key !== "children" && key !== "key") {
+              setCurrentlyValidatingElement$1(fragment);
+              error("Invalid prop `%s` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.", key);
+              setCurrentlyValidatingElement$1(null);
+              break;
+            }
+          }
+          if (fragment.ref !== null) {
+            setCurrentlyValidatingElement$1(fragment);
+            error("Invalid attribute `ref` supplied to `React.Fragment`.");
+            setCurrentlyValidatingElement$1(null);
+          }
+        }
+      }
+      var didWarnAboutKeySpread = {};
+      function jsxWithValidation(type, props, key, isStaticChildren, source, self) {
+        {
+          var validType = isValidElementType(type);
+          if (!validType) {
+            var info = "";
+            if (type === void 0 || typeof type === "object" && type !== null && Object.keys(type).length === 0) {
+              info += " You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.";
+            }
+            var sourceInfo = getSourceInfoErrorAddendum(source);
+            if (sourceInfo) {
+              info += sourceInfo;
+            } else {
+              info += getDeclarationErrorAddendum();
+            }
+            var typeString;
+            if (type === null) {
+              typeString = "null";
+            } else if (isArray(type)) {
+              typeString = "array";
+            } else if (type !== void 0 && type.$$typeof === REACT_ELEMENT_TYPE) {
+              typeString = "<" + (getComponentNameFromType(type.type) || "Unknown") + " />";
+              info = " Did you accidentally export a JSX literal instead of a component?";
+            } else {
+              typeString = typeof type;
+            }
+            error("React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s", typeString, info);
+          }
+          var element = jsxDEV(type, props, key, source, self);
+          if (element == null) {
+            return element;
+          }
+          if (validType) {
+            var children = props.children;
+            if (children !== void 0) {
+              if (isStaticChildren) {
+                if (isArray(children)) {
+                  for (var i = 0; i < children.length; i++) {
+                    validateChildKeys(children[i], type);
+                  }
+                  if (Object.freeze) {
+                    Object.freeze(children);
+                  }
+                } else {
+                  error("React.jsx: Static children should always be an array. You are likely explicitly calling React.jsxs or React.jsxDEV. Use the Babel transform instead.");
+                }
+              } else {
+                validateChildKeys(children, type);
+              }
+            }
+          }
+          {
+            if (hasOwnProperty.call(props, "key")) {
+              var componentName = getComponentNameFromType(type);
+              var keys = Object.keys(props).filter(function(k) {
+                return k !== "key";
+              });
+              var beforeExample = keys.length > 0 ? "{key: someKey, " + keys.join(": ..., ") + ": ...}" : "{key: someKey}";
+              if (!didWarnAboutKeySpread[componentName + beforeExample]) {
+                var afterExample = keys.length > 0 ? "{" + keys.join(": ..., ") + ": ...}" : "{}";
+                error('A props object containing a "key" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />', beforeExample, componentName, afterExample, componentName);
+                didWarnAboutKeySpread[componentName + beforeExample] = true;
+              }
+            }
+          }
+          if (type === REACT_FRAGMENT_TYPE) {
+            validateFragmentProps(element);
+          } else {
+            validatePropTypes(element);
+          }
+          return element;
+        }
+      }
+      function jsxWithValidationStatic(type, props, key) {
+        {
+          return jsxWithValidation(type, props, key, true);
+        }
+      }
+      function jsxWithValidationDynamic(type, props, key) {
+        {
+          return jsxWithValidation(type, props, key, false);
+        }
+      }
+      var jsx = jsxWithValidationDynamic;
+      var jsxs = jsxWithValidationStatic;
+      reactJsxRuntime_development.Fragment = REACT_FRAGMENT_TYPE;
+      reactJsxRuntime_development.jsx = jsx;
+      reactJsxRuntime_development.jsxs = jsxs;
+    })();
+  }
+  return reactJsxRuntime_development;
+}
+if (process.env.NODE_ENV === "production") {
+  jsxRuntime.exports = requireReactJsxRuntime_production_min();
+} else {
+  jsxRuntime.exports = requireReactJsxRuntime_development();
+}
+var jsxRuntimeExports = jsxRuntime.exports;
+var client = {};
+var reactDom = { exports: {} };
+var reactDom_production_min = {};
 var scheduler = { exports: {} };
 var scheduler_production_min = {};
 /**
@@ -31129,7 +32020,7 @@ const setState = (newState) => {
 };
 const actions = {
   updateMessage: (message) => {
-    setState((prev) => __spreadProps(__spreadValues({}, prev), { currentMessage: message }));
+    setState((prev) => ({ ...prev, currentMessage: message }));
   },
   sendMessage: () => {
     if (!sharedState.currentMessage.trim() || sharedState.isGenerating)
@@ -31140,7 +32031,8 @@ const actions = {
       content: sharedState.currentMessage,
       timestamp: (/* @__PURE__ */ new Date()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
-    setState((prev) => __spreadProps(__spreadValues({}, prev), {
+    setState((prev) => ({
+      ...prev,
       messages: [...prev.messages, userMessage],
       currentMessage: "",
       isGenerating: true
@@ -31153,7 +32045,8 @@ const actions = {
         timestamp: (/* @__PURE__ */ new Date()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         cost: "$0.015"
       };
-      setState((prev) => __spreadProps(__spreadValues({}, prev), {
+      setState((prev) => ({
+        ...prev,
         messages: [...prev.messages, aiResponse],
         isGenerating: false,
         editorContent: `// Response generated at ${(/* @__PURE__ */ new Date()).toLocaleTimeString()}
@@ -31162,10 +32055,10 @@ console.log("Hello, Conductor!");`
     }, 2e3);
   },
   setModel: (model) => {
-    setState((prev) => __spreadProps(__spreadValues({}, prev), { selectedModel: model, showModelSelect: false }));
+    setState((prev) => ({ ...prev, selectedModel: model, showModelSelect: false }));
   },
   toggleModelSelect: () => {
-    setState((prev) => __spreadProps(__spreadValues({}, prev), { showModelSelect: !prev.showModelSelect }));
+    setState((prev) => ({ ...prev, showModelSelect: !prev.showModelSelect }));
   },
   createRipple: (event) => {
     const button = event.currentTarget;
@@ -31192,7 +32085,7 @@ const ConductorProvider = ({ children }) => {
       stateListeners = stateListeners.filter((listener) => listener !== setLocalState);
     };
   }, []);
-  return /* @__PURE__ */ React.createElement(ConductorContext.Provider, { value: { state: localState, actions, createRipple: actions.createRipple, setState } }, children);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorContext.Provider, { value: { state: localState, actions, createRipple: actions.createRipple, setState }, children });
 };
 const useConductor = () => {
   const context = reactExports.useContext(ConductorContext);
@@ -31225,23 +32118,29 @@ const useTypingEffect = (text, speed = 50) => {
 };
 const TypingMessage = ({ content, cost }) => {
   const { displayText, isTyping } = useTypingEffect(content, 30);
-  return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("div", { className: "whitespace-pre-line" }, displayText, isTyping && /* @__PURE__ */ React.createElement("span", { className: "animate-pulse text-orange-400" }, "|")), cost && !isTyping && /* @__PURE__ */ React.createElement(
-    "span",
-    {
-      className: "inline-block mt-2 px-2 py-1 bg-orange-800 border border-orange-600 rounded text-orange-300 text-xs",
-      style: {
-        display: "inline-block",
-        marginTop: "0.5rem",
-        padding: "0.25rem 0.5rem",
-        backgroundColor: "rgb(154, 52, 18)",
-        border: "1px solid rgb(255, 165, 0)",
-        borderRadius: "0.25rem",
-        color: "rgb(253, 186, 116)",
-        fontSize: "0.75rem"
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "whitespace-pre-line", children: [
+      displayText,
+      isTyping && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "animate-pulse text-orange-400", children: "|" })
+    ] }),
+    cost && !isTyping && /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "span",
+      {
+        className: "inline-block mt-2 px-2 py-1 bg-orange-800 border border-orange-600 rounded text-orange-300 text-xs",
+        style: {
+          display: "inline-block",
+          marginTop: "0.5rem",
+          padding: "0.25rem 0.5rem",
+          backgroundColor: "rgb(154, 52, 18)",
+          border: "1px solid rgb(255, 165, 0)",
+          borderRadius: "0.25rem",
+          color: "rgb(253, 186, 116)",
+          fontSize: "0.75rem"
+        },
+        children: cost
       }
-    },
-    cost
-  ));
+    )
+  ] });
 };
 var defaultAttributes = {
   xmlns: "http://www.w3.org/2000/svg",
@@ -31257,25 +32156,23 @@ var defaultAttributes = {
 const toKebabCase = (string) => string.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
 const createLucideIcon = (iconName, iconNode) => {
   const Component = reactExports.forwardRef(
-    (_a, ref) => {
-      var _b = _a, { color = "currentColor", size = 24, strokeWidth = 2, absoluteStrokeWidth, children } = _b, rest = __objRest(_b, ["color", "size", "strokeWidth", "absoluteStrokeWidth", "children"]);
-      return reactExports.createElement(
-        "svg",
-        __spreadValues(__spreadProps(__spreadValues({
-          ref
-        }, defaultAttributes), {
-          width: size,
-          height: size,
-          stroke: color,
-          strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size) : strokeWidth,
-          className: `lucide lucide-${toKebabCase(iconName)}`
-        }), rest),
-        [
-          ...iconNode.map(([tag, attrs]) => reactExports.createElement(tag, attrs)),
-          ...(Array.isArray(children) ? children : [children]) || []
-        ]
-      );
-    }
+    ({ color = "currentColor", size = 24, strokeWidth = 2, absoluteStrokeWidth, children, ...rest }, ref) => reactExports.createElement(
+      "svg",
+      {
+        ref,
+        ...defaultAttributes,
+        width: size,
+        height: size,
+        stroke: color,
+        strokeWidth: absoluteStrokeWidth ? Number(strokeWidth) * 24 / Number(size) : strokeWidth,
+        className: `lucide lucide-${toKebabCase(iconName)}`,
+        ...rest
+      },
+      [
+        ...iconNode.map(([tag, attrs]) => reactExports.createElement(tag, attrs)),
+        ...(Array.isArray(children) ? children : [children]) || []
+      ]
+    )
   );
   Component.displayName = `${iconName}`;
   return Component;
@@ -31453,76 +32350,149 @@ const AIGuideSystem = ({ isActive, onClose }) => {
   if (!isActive)
     return null;
   if (isMinimized) {
-    return /* @__PURE__ */ React.createElement("div", { className: "fixed bottom-4 right-4 z-50" }, /* @__PURE__ */ React.createElement(
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed bottom-4 right-4 z-50", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "button",
       {
         onClick: () => setIsMinimized(false),
-        className: "ai-guide-indicator animate-pulse"
-      },
-      /* @__PURE__ */ React.createElement(Bot, { size: 16 }),
-      "AI Guide Active"
-    ));
-  }
-  return /* @__PURE__ */ React.createElement("div", { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" }, /* @__PURE__ */ React.createElement("div", { className: "ai-guide-bubble max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center justify-between p-4 border-b border-orange-600/30" }, /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-3" }, /* @__PURE__ */ React.createElement("div", { className: "p-2 bg-orange-600 rounded-full" }, /* @__PURE__ */ React.createElement(Bot, { size: 20, className: "text-white" })), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h3", { className: "text-lg font-bold text-purple-400" }, "🤖 AI Guide"), /* @__PURE__ */ React.createElement("p", { className: "text-xs text-gray-400" }, "Intelligent assistance for CONDUCTOR"))), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(
-    "button",
-    {
-      onClick: () => setIsMinimized(true),
-      className: "p-2 text-gray-400 hover:text-purple-400 transition-colors",
-      title: "Minimize"
-    },
-    /* @__PURE__ */ React.createElement(ArrowRight, { size: 16 })
-  ), /* @__PURE__ */ React.createElement(
-    "button",
-    {
-      onClick: onClose,
-      className: "p-2 text-gray-400 hover:text-red-400 transition-colors",
-      title: "Close"
-    },
-    "×"
-  ))), /* @__PURE__ */ React.createElement("div", { className: "flex-1 overflow-y-auto" }, !currentScenario ? (
-    /* Scenario Selection */
-    /* @__PURE__ */ React.createElement("div", { className: "p-4" }, /* @__PURE__ */ React.createElement("h4", { className: "text-purple-400 font-semibold mb-4" }, "How can I help you today?"), /* @__PURE__ */ React.createElement("div", { className: "space-y-3" }, guideScenarios.map((scenario) => /* @__PURE__ */ React.createElement(
-      "button",
-      {
-        key: scenario.id,
-        onClick: () => handleScenarioSelect(scenario),
-        className: "w-full text-left p-3 rounded-lg border border-orange-600/30 bg-black/60 hover:bg-orange-600/10 transition-colors"
-      },
-      /* @__PURE__ */ React.createElement("div", { className: "flex items-start gap-3" }, /* @__PURE__ */ React.createElement("div", { className: `p-1 rounded ${scenario.priority === "high" ? "bg-red-600" : scenario.priority === "medium" ? "bg-yellow-600" : "bg-blue-600"}` }, scenario.id === "getting-started" && /* @__PURE__ */ React.createElement(Lightbulb, { size: 12 }), scenario.id === "troubleshooting" && /* @__PURE__ */ React.createElement(AlertTriangle, { size: 12 }), scenario.id === "optimization" && /* @__PURE__ */ React.createElement(CheckCircle, { size: 12 }), scenario.id === "features" && /* @__PURE__ */ React.createElement(Bot, { size: 12 })), /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h5", { className: "font-medium text-gray-200" }, scenario.title), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-gray-400" }, scenario.description)))
-    ))))
-  ) : (
-    /* Active Guidance */
-    /* @__PURE__ */ React.createElement("div", { className: "p-4" }, /* @__PURE__ */ React.createElement("div", { className: "mb-6" }, /* @__PURE__ */ React.createElement("h4", { className: "text-purple-400 font-semibold text-lg mb-2" }, currentScenario.title), /* @__PURE__ */ React.createElement(TypingMessage, { content: currentScenario.description })), /* @__PURE__ */ React.createElement("div", { className: "mb-6" }, /* @__PURE__ */ React.createElement("div", { className: "flex justify-between text-sm text-gray-400 mb-2" }, /* @__PURE__ */ React.createElement("span", null, "Progress"), /* @__PURE__ */ React.createElement("span", null, completedSteps.size, " / ", currentScenario.steps.length)), /* @__PURE__ */ React.createElement("div", { className: "w-full bg-gray-800 rounded-full h-2" }, /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "bg-gradient-to-r from-orange-600 to-purple-400 h-2 rounded-full transition-all duration-500",
-        style: { width: `${completedSteps.size / currentScenario.steps.length * 100}%` }
+        className: "ai-guide-indicator animate-pulse",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Bot, { size: 16 }),
+          "AI Guide Active"
+        ]
       }
-    ))), /* @__PURE__ */ React.createElement("div", { className: "guidance-step mb-4" }, /* @__PURE__ */ React.createElement("div", { className: "guidance-step-number" }, currentStepIndex + 1), /* @__PURE__ */ React.createElement("div", { className: "flex-1" }, /* @__PURE__ */ React.createElement("h5", { className: "font-semibold text-gray-200 mb-2" }, currentScenario.steps[currentStepIndex] && currentScenario.steps[currentStepIndex].title), /* @__PURE__ */ React.createElement("p", { className: "text-sm text-gray-400 mb-3" }, currentScenario.steps[currentStepIndex] && currentScenario.steps[currentStepIndex].description), currentScenario.steps[currentStepIndex] && currentScenario.steps[currentStepIndex].action && /* @__PURE__ */ React.createElement("div", { className: "bg-orange-600/20 border border-orange-600/30 rounded p-3 mb-3" }, /* @__PURE__ */ React.createElement("p", { className: "text-sm text-purple-300" }, /* @__PURE__ */ React.createElement("strong", null, "Action:"), " ", currentScenario.steps[currentStepIndex].action)), /* @__PURE__ */ React.createElement(
-      "button",
-      {
-        onClick: () => handleStepComplete(currentScenario.steps[currentStepIndex].id),
-        disabled: completedSteps.has(currentScenario.steps[currentStepIndex].id),
-        className: "conductor-button border border-orange-600 px-4 py-2 rounded text-orange-600 hover:bg-orange-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-      },
-      completedSteps.has(currentScenario.steps[currentStepIndex].id) ? /* @__PURE__ */ React.createElement("span", { className: "flex items-center gap-2" }, /* @__PURE__ */ React.createElement(CheckCircle, { size: 16 }), " Completed") : "Mark as Complete"
-    ))), /* @__PURE__ */ React.createElement("div", { className: "border-t border-orange-600/30 pt-4" }, /* @__PURE__ */ React.createElement("h5", { className: "text-sm font-semibold text-gray-300 mb-3" }, "All Steps:"), /* @__PURE__ */ React.createElement("div", { className: "space-y-2" }, currentScenario.steps.map((step, index) => /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        key: step.id,
-        className: `flex items-center gap-3 p-2 rounded ${index === currentStepIndex ? "bg-orange-600/20" : "bg-transparent"}`
-      },
-      /* @__PURE__ */ React.createElement("div", { className: `w-6 h-6 rounded-full flex items-center justify-center text-xs ${completedSteps.has(step.id) ? "bg-green-600 text-white" : index === currentStepIndex ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-400"}` }, completedSteps.has(step.id) ? "✓" : index + 1),
-      /* @__PURE__ */ React.createElement("span", { className: `text-sm ${completedSteps.has(step.id) ? "text-green-400 line-through" : index === currentStepIndex ? "text-purple-400 font-medium" : "text-gray-400"}` }, step.title)
-    )))))
-  )), /* @__PURE__ */ React.createElement("div", { className: "border-t border-orange-600/30 p-4" }, /* @__PURE__ */ React.createElement("div", { className: "flex justify-between items-center" }, currentScenario && /* @__PURE__ */ React.createElement(
-    "button",
-    {
-      onClick: () => setCurrentScenario(null),
-      className: "text-sm text-gray-400 hover:text-purple-400 transition-colors"
-    },
-    "← Back to scenarios"
-  ), /* @__PURE__ */ React.createElement("div", { className: "text-xs text-gray-500" }, "CONDUCTOR v2.1.3 AI Guide System")))));
+    ) });
+  }
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "ai-guide-bubble max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between p-4 border-b border-orange-600/30", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "p-2 bg-orange-600 rounded-full", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Bot, { size: 20, className: "text-white" }) }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h3", { className: "text-lg font-bold text-purple-400", children: "🤖 AI Guide" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-400", children: "Intelligent assistance for CONDUCTOR" })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: () => setIsMinimized(true),
+            className: "p-2 text-gray-400 hover:text-purple-400 transition-colors",
+            title: "Minimize",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowRight, { size: 16 })
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: onClose,
+            className: "p-2 text-gray-400 hover:text-red-400 transition-colors",
+            title: "Close",
+            children: "×"
+          }
+        )
+      ] })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex-1 overflow-y-auto", children: !currentScenario ? (
+      /* Scenario Selection */
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-purple-400 font-semibold mb-4", children: "How can I help you today?" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-3", children: guideScenarios.map((scenario) => /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "button",
+          {
+            onClick: () => handleScenarioSelect(scenario),
+            className: "w-full text-left p-3 rounded-lg border border-orange-600/30 bg-black/60 hover:bg-orange-600/10 transition-colors",
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-3", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `p-1 rounded ${scenario.priority === "high" ? "bg-red-600" : scenario.priority === "medium" ? "bg-yellow-600" : "bg-blue-600"}`, children: [
+                scenario.id === "getting-started" && /* @__PURE__ */ jsxRuntimeExports.jsx(Lightbulb, { size: 12 }),
+                scenario.id === "troubleshooting" && /* @__PURE__ */ jsxRuntimeExports.jsx(AlertTriangle, { size: 12 }),
+                scenario.id === "optimization" && /* @__PURE__ */ jsxRuntimeExports.jsx(CheckCircle, { size: 12 }),
+                scenario.id === "features" && /* @__PURE__ */ jsxRuntimeExports.jsx(Bot, { size: 12 })
+              ] }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("h5", { className: "font-medium text-gray-200", children: scenario.title }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-400", children: scenario.description })
+              ] })
+            ] })
+          },
+          scenario.id
+        )) })
+      ] })
+    ) : (
+      /* Active Guidance */
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "p-4", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h4", { className: "text-purple-400 font-semibold text-lg mb-2", children: currentScenario.title }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(TypingMessage, { content: currentScenario.description })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between text-sm text-gray-400 mb-2", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Progress" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+              completedSteps.size,
+              " / ",
+              currentScenario.steps.length
+            ] })
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-full bg-gray-800 rounded-full h-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+            "div",
+            {
+              className: "bg-gradient-to-r from-orange-600 to-purple-400 h-2 rounded-full transition-all duration-500",
+              style: { width: `${completedSteps.size / currentScenario.steps.length * 100}%` }
+            }
+          ) })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "guidance-step mb-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "guidance-step-number", children: currentStepIndex + 1 }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("h5", { className: "font-semibold text-gray-200 mb-2", children: currentScenario.steps[currentStepIndex] && currentScenario.steps[currentStepIndex].title }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-400 mb-3", children: currentScenario.steps[currentStepIndex] && currentScenario.steps[currentStepIndex].description }),
+            currentScenario.steps[currentStepIndex] && currentScenario.steps[currentStepIndex].action && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "bg-orange-600/20 border border-orange-600/30 rounded p-3 mb-3", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-sm text-purple-300", children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Action:" }),
+              " ",
+              currentScenario.steps[currentStepIndex].action
+            ] }) }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx(
+              "button",
+              {
+                onClick: () => handleStepComplete(currentScenario.steps[currentStepIndex].id),
+                disabled: completedSteps.has(currentScenario.steps[currentStepIndex].id),
+                className: "conductor-button border border-orange-600 px-4 py-2 rounded text-orange-600 hover:bg-orange-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+                children: completedSteps.has(currentScenario.steps[currentStepIndex].id) ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-2", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(CheckCircle, { size: 16 }),
+                  " Completed"
+                ] }) : "Mark as Complete"
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "border-t border-orange-600/30 pt-4", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h5", { className: "text-sm font-semibold text-gray-300 mb-3", children: "All Steps:" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "space-y-2", children: currentScenario.steps.map((step, index) => /* @__PURE__ */ jsxRuntimeExports.jsxs(
+            "div",
+            {
+              className: `flex items-center gap-3 p-2 rounded ${index === currentStepIndex ? "bg-orange-600/20" : "bg-transparent"}`,
+              children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `w-6 h-6 rounded-full flex items-center justify-center text-xs ${completedSteps.has(step.id) ? "bg-green-600 text-white" : index === currentStepIndex ? "bg-orange-600 text-white" : "bg-gray-700 text-gray-400"}`, children: completedSteps.has(step.id) ? "✓" : index + 1 }),
+                /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: `text-sm ${completedSteps.has(step.id) ? "text-green-400 line-through" : index === currentStepIndex ? "text-purple-400 font-medium" : "text-gray-400"}`, children: step.title })
+              ]
+            },
+            step.id
+          )) })
+        ] })
+      ] })
+    ) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "border-t border-orange-600/30 p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex justify-between items-center", children: [
+      currentScenario && /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          onClick: () => setCurrentScenario(null),
+          className: "text-sm text-gray-400 hover:text-purple-400 transition-colors",
+          children: "← Back to scenarios"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-xs text-gray-500", children: "CONDUCTOR v2.1.3 AI Guide System" })
+    ] }) })
+  ] }) });
 };
 const ObsidianIcon = ({
   iconName,
@@ -31537,7 +32507,7 @@ const ObsidianIcon = ({
       (_a = window.obsidian) == null ? void 0 : _a.setIcon(iconRef.current, iconName);
     }
   }, [iconName]);
-  return /* @__PURE__ */ React.createElement("div", { ref: iconRef, className: `inline-flex items-center justify-center ${className}`, style: { width: size, height: size } });
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: iconRef, className: `inline-flex items-center justify-center ${className}`, style: { width: size, height: size } });
 };
 const ConductorChatPane = () => {
   const { state, actions: actions2, createRipple } = useConductor();
@@ -31572,189 +32542,210 @@ const ConductorChatPane = () => {
     padding: "0",
     boxShadow: "0 0 10px rgba(255, 165, 0, 0.3)"
   };
-  return /* @__PURE__ */ React.createElement(
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(
     "div",
     {
       className: "w-full h-full bg-black text-gray-200 flex flex-col font-mono border border-orange-600 rounded",
-      style: containerStyle
-    },
-    /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "flex items-center justify-between px-4 py-2 border-b border-orange-600 bg-black",
-        style: {
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0.5rem 1rem",
-          borderBottom: "1px solid rgb(255, 165, 0)",
-          backgroundColor: "rgb(0, 0, 0)",
-          height: "50px",
-          minHeight: "50px"
-        }
-      },
-      /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2", style: { display: "flex", alignItems: "center", gap: "0.5rem" } }, /* @__PURE__ */ React.createElement("div", { className: "text-sm font-bold text-orange-600 tracking-wide", style: { fontSize: "0.875rem", fontWeight: "700", color: "rgb(255, 165, 0)", letterSpacing: "0.025em" } }, "GOKU-AI Chat")),
-      /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 text-xs" }, /* @__PURE__ */ React.createElement(
-        "button",
-        {
-          onClick: () => setShowGuide(true),
-          className: "text-orange-600 hover:text-orange-400 p-1 rounded transition-colors",
-          title: "AI Guide"
-        },
-        /* @__PURE__ */ React.createElement(ObsidianIcon, { iconName: "bot", size: 14 })
-      ), /* @__PURE__ */ React.createElement("div", { className: "flex items-center gap-2 text-orange-600" }, /* @__PURE__ */ React.createElement(ObsidianIcon, { iconName: "message-circle", size: 12 }), /* @__PURE__ */ React.createElement("span", null, state.selectedModel)), state.isConnected && /* @__PURE__ */ React.createElement("div", { className: "w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" }))
-    ),
-    /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        ref: chatRef,
-        className: "flex-1 overflow-y-auto p-4 space-y-4",
-        style: {
-          flex: "1 1 0%",
-          overflowY: "auto",
-          padding: "1rem",
-          backgroundColor: "rgb(0, 0, 0)",
-          minHeight: "0",
-          height: "calc(100vh - 140px)"
-        }
-      },
-      state.messages.map((message) => /* @__PURE__ */ React.createElement("div", { key: message.id, style: { marginBottom: "1rem" } }, /* @__PURE__ */ React.createElement(
-        "div",
-        {
-          className: "flex items-center gap-2 mb-2 text-xs text-gray-400",
-          style: {
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            marginBottom: "0.5rem",
-            fontSize: "0.75rem",
-            color: "rgb(156, 163, 175)"
-          }
-        },
-        /* @__PURE__ */ React.createElement("span", null, message.role === "user" ? "You" : "Assistant"),
-        /* @__PURE__ */ React.createElement(
-          "span",
+      style: containerStyle,
+      children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          "div",
           {
-            className: "ml-auto",
-            style: { marginLeft: "auto" }
-          },
-          message.timestamp
-        )
-      ), /* @__PURE__ */ React.createElement(
-        "div",
-        {
-          className: `p-4 rounded-lg border text-sm ${message.role === "user" ? "bg-gray-800 border-orange-600 ml-8" : "bg-gray-900 border-orange-600 mr-8"}`,
-          style: {
-            padding: "1rem",
-            borderRadius: "0.5rem",
-            border: "1px solid rgb(255, 165, 0)",
-            fontSize: "0.875rem",
-            backgroundColor: message.role === "user" ? "rgb(31, 41, 55)" : "rgb(17, 24, 39)",
-            marginLeft: message.role === "user" ? "2rem" : "0",
-            marginRight: message.role === "user" ? "0" : "2rem"
-          }
-        },
-        /* @__PURE__ */ React.createElement(TypingMessage, { content: message.content, cost: message.cost })
-      )))
-    ),
-    /* @__PURE__ */ React.createElement(
-      "div",
-      {
-        className: "border-t border-orange-600 p-4 bg-black",
-        style: {
-          borderTop: "1px solid rgb(255, 165, 0)",
-          padding: "1rem",
-          backgroundColor: "rgb(0, 0, 0)"
-        }
-      },
-      /* @__PURE__ */ React.createElement("div", { className: "relative", style: { position: "relative" } }, /* @__PURE__ */ React.createElement(
-        "textarea",
-        {
-          value: state.currentMessage,
-          onChange: (e) => actions2.updateMessage(e.target.value),
-          onKeyPress: handleKeyPress,
-          placeholder: "Type your message...",
-          className: "w-full bg-transparent text-gray-200 border border-orange-600 rounded px-3 py-2 pr-20 text-sm resize-none",
-          style: {
-            width: "100%",
-            backgroundColor: "transparent",
-            color: "rgb(229, 231, 235)",
-            border: "1px solid rgb(255, 165, 0)",
-            borderRadius: "0.25rem",
-            padding: "0.5rem 5rem 0.5rem 0.75rem",
-            fontSize: "0.875rem",
-            resize: "none",
-            outline: "none",
-            minHeight: "40px"
-          }
-        }
-      ), /* @__PURE__ */ React.createElement(
-        "div",
-        {
-          className: "absolute right-2 bottom-2 flex items-center gap-1",
-          style: {
-            position: "absolute",
-            right: "0.5rem",
-            bottom: "0.5rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.25rem",
-            background: "transparent"
-          }
-        },
-        /* @__PURE__ */ React.createElement(
-          "button",
-          {
-            className: "text-orange-600 hover:text-orange-400 p-1",
+            className: "flex items-center justify-between px-4 py-2 border-b border-orange-600 bg-black",
             style: {
-              color: "rgb(255, 165, 0)",
-              padding: "0.25rem",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer"
-            }
-          },
-          /* @__PURE__ */ React.createElement(ObsidianIcon, { iconName: "plus", size: 14 })
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0.5rem 1rem",
+              borderBottom: "1px solid rgb(255, 165, 0)",
+              backgroundColor: "rgb(0, 0, 0)",
+              height: "50px",
+              minHeight: "50px"
+            },
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex items-center gap-2", style: { display: "flex", alignItems: "center", gap: "0.5rem" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-sm font-bold text-orange-600 tracking-wide", style: { fontSize: "0.875rem", fontWeight: "700", color: "rgb(255, 165, 0)", letterSpacing: "0.025em" }, children: "GOKU-AI Chat" }) }),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-xs", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(
+                  "button",
+                  {
+                    onClick: () => setShowGuide(true),
+                    className: "text-orange-600 hover:text-orange-400 p-1 rounded transition-colors",
+                    title: "AI Guide",
+                    children: /* @__PURE__ */ jsxRuntimeExports.jsx(ObsidianIcon, { iconName: "bot", size: 14 })
+                  }
+                ),
+                /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 text-orange-600", children: [
+                  /* @__PURE__ */ jsxRuntimeExports.jsx(ObsidianIcon, { iconName: "message-circle", size: 12 }),
+                  /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: state.selectedModel })
+                ] }),
+                state.isConnected && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" })
+              ] })
+            ]
+          }
         ),
-        /* @__PURE__ */ React.createElement(
-          "button",
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
           {
-            className: "text-orange-600 hover:text-orange-400 p-1",
+            ref: chatRef,
+            className: "flex-1 overflow-y-auto p-4 space-y-4",
             style: {
-              color: "rgb(255, 165, 0)",
-              padding: "0.25rem",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer"
-            }
-          },
-          /* @__PURE__ */ React.createElement(ObsidianIcon, { iconName: "mic", size: 14 })
+              flex: "1 1 0%",
+              overflowY: "auto",
+              padding: "1rem",
+              backgroundColor: "rgb(0, 0, 0)",
+              minHeight: "0",
+              height: "calc(100vh - 140px)"
+            },
+            children: state.messages.map((message) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { marginBottom: "1rem" }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "div",
+                {
+                  className: "flex items-center gap-2 mb-2 text-xs text-gray-400",
+                  style: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    marginBottom: "0.5rem",
+                    fontSize: "0.75rem",
+                    color: "rgb(156, 163, 175)"
+                  },
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: message.role === "user" ? "You" : "Assistant" }),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "span",
+                      {
+                        className: "ml-auto",
+                        style: { marginLeft: "auto" },
+                        children: message.timestamp
+                      }
+                    )
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "div",
+                {
+                  className: `p-4 rounded-lg border text-sm ${message.role === "user" ? "bg-gray-800 border-orange-600 ml-8" : "bg-gray-900 border-orange-600 mr-8"}`,
+                  style: {
+                    padding: "1rem",
+                    borderRadius: "0.5rem",
+                    border: "1px solid rgb(255, 165, 0)",
+                    fontSize: "0.875rem",
+                    backgroundColor: message.role === "user" ? "rgb(31, 41, 55)" : "rgb(17, 24, 39)",
+                    marginLeft: message.role === "user" ? "2rem" : "0",
+                    marginRight: message.role === "user" ? "0" : "2rem"
+                  },
+                  children: /* @__PURE__ */ jsxRuntimeExports.jsx(TypingMessage, { content: message.content, cost: message.cost })
+                }
+              )
+            ] }, message.id))
+          }
         ),
-        /* @__PURE__ */ React.createElement(
-          "button",
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "div",
           {
-            onClick: actions2.sendMessage,
-            disabled: !state.currentMessage.trim() || state.isGenerating,
-            className: "text-orange-600 hover:text-orange-400 p-1 disabled:opacity-50",
+            className: "border-t border-orange-600 p-4 bg-black",
             style: {
-              color: "rgb(255, 165, 0)",
-              padding: "0.25rem",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer"
-            }
-          },
-          state.isGenerating ? /* @__PURE__ */ React.createElement("div", { className: "animate-spin w-3.5 h-3.5 border-2 border-transparent border-t-orange-400 rounded-full" }) : /* @__PURE__ */ React.createElement(ObsidianIcon, { iconName: "send", size: 14 })
+              borderTop: "1px solid rgb(255, 165, 0)",
+              padding: "1rem",
+              backgroundColor: "rgb(0, 0, 0)"
+            },
+            children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", style: { position: "relative" }, children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsx(
+                "textarea",
+                {
+                  value: state.currentMessage,
+                  onChange: (e) => actions2.updateMessage(e.target.value),
+                  onKeyPress: handleKeyPress,
+                  placeholder: "Type your message...",
+                  className: "w-full bg-transparent text-gray-200 border border-orange-600 rounded px-3 py-2 pr-20 text-sm resize-none",
+                  style: {
+                    width: "100%",
+                    backgroundColor: "transparent",
+                    color: "rgb(229, 231, 235)",
+                    border: "1px solid rgb(255, 165, 0)",
+                    borderRadius: "0.25rem",
+                    padding: "0.5rem 5rem 0.5rem 0.75rem",
+                    fontSize: "0.875rem",
+                    resize: "none",
+                    outline: "none",
+                    minHeight: "40px"
+                  }
+                }
+              ),
+              /* @__PURE__ */ jsxRuntimeExports.jsxs(
+                "div",
+                {
+                  className: "absolute right-2 bottom-2 flex items-center gap-1",
+                  style: {
+                    position: "absolute",
+                    right: "0.5rem",
+                    bottom: "0.5rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    background: "transparent"
+                  },
+                  children: [
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "button",
+                      {
+                        className: "text-orange-600 hover:text-orange-400 p-1",
+                        style: {
+                          color: "rgb(255, 165, 0)",
+                          padding: "0.25rem",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer"
+                        },
+                        children: /* @__PURE__ */ jsxRuntimeExports.jsx(ObsidianIcon, { iconName: "plus", size: 14 })
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "button",
+                      {
+                        className: "text-orange-600 hover:text-orange-400 p-1",
+                        style: {
+                          color: "rgb(255, 165, 0)",
+                          padding: "0.25rem",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer"
+                        },
+                        children: /* @__PURE__ */ jsxRuntimeExports.jsx(ObsidianIcon, { iconName: "mic", size: 14 })
+                      }
+                    ),
+                    /* @__PURE__ */ jsxRuntimeExports.jsx(
+                      "button",
+                      {
+                        onClick: actions2.sendMessage,
+                        disabled: !state.currentMessage.trim() || state.isGenerating,
+                        className: "text-orange-600 hover:text-orange-400 p-1 disabled:opacity-50",
+                        style: {
+                          color: "rgb(255, 165, 0)",
+                          padding: "0.25rem",
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer"
+                        },
+                        children: state.isGenerating ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "animate-spin w-3.5 h-3.5 border-2 border-transparent border-t-orange-400 rounded-full" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(ObsidianIcon, { iconName: "send", size: 14 })
+                      }
+                    )
+                  ]
+                }
+              )
+            ] })
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          AIGuideSystem,
+          {
+            isActive: showGuide,
+            onClose: () => setShowGuide(false)
+          }
         )
-      ))
-    ),
-    /* @__PURE__ */ React.createElement(
-      AIGuideSystem,
-      {
-        isActive: showGuide,
-        onClose: () => setShowGuide(false)
-      }
-    )
+      ]
+    }
   );
 };
 const CHAT_VIEW_TYPE = "conductor-chat-view";
@@ -31771,24 +32762,22 @@ class ChatView extends obsidian.ItemView {
   getDisplayText() {
     return "GOKU‐AI Chat";
   }
-  onOpen() {
-    return __async(this, null, function* () {
-      this.containerEl.empty();
-      this.containerEl.style.width = "100%";
-      this.containerEl.style.height = "100%";
-      this.containerEl.style.overflow = "hidden";
-      this.containerEl.style.position = "relative";
-      this.injectConductorStyles();
-      const container = this.containerEl.createDiv();
-      container.addClass("conductor-chat-container");
-      container.style.width = "100%";
-      container.style.height = "100%";
-      this.createDynamicBorderPane();
-      this.root = client.createRoot(container);
-      this.root.render(
-        /* @__PURE__ */ React.createElement(React.StrictMode, null, /* @__PURE__ */ React.createElement(ConductorProvider, null, /* @__PURE__ */ React.createElement(ConductorChatPane, null)))
-      );
-    });
+  async onOpen() {
+    this.containerEl.empty();
+    this.containerEl.style.width = "100%";
+    this.containerEl.style.height = "100%";
+    this.containerEl.style.overflow = "hidden";
+    this.containerEl.style.position = "relative";
+    this.injectConductorStyles();
+    const container = this.containerEl.createDiv();
+    container.addClass("conductor-chat-container");
+    container.style.width = "100%";
+    container.style.height = "100%";
+    this.createDynamicBorderPane();
+    this.root = client.createRoot(container);
+    this.root.render(
+      /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorChatPane, {}) }) })
+    );
   }
   injectConductorStyles() {
     if (document.getElementById("conductor-styles"))
@@ -31979,105 +32968,101 @@ class ChatView extends obsidian.ItemView {
       borderThickness
     });
   }
-  onClose() {
-    return __async(this, null, function* () {
-      if (this.resizeObserver) {
-        this.resizeObserver.disconnect();
-        this.resizeObserver = null;
-      }
-      if (this.root) {
-        this.root.unmount();
-        this.root = null;
-      }
-      this.borderPane = null;
-    });
+  async onClose() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
+    }
+    this.borderPane = null;
   }
 }
 const conductor = "";
 class GokuMultiModelPlugin extends obsidian.Plugin {
-  onload() {
-    return __async(this, null, function* () {
-      this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf));
-      this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", () => __async(this, null, function* () {
-        yield this.setupChatView();
-      }));
-      this.addCommand({
-        id: "setup-goku-chat",
-        name: "Setup GOKU‐AI Chat",
-        callback: () => __async(this, null, function* () {
-          yield this.setupChatView();
-        })
+  async onload() {
+    this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf));
+    this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", async () => {
+      await this.setupChatView();
+    });
+    this.addCommand({
+      id: "setup-goku-chat",
+      name: "Setup GOKU‐AI Chat",
+      callback: async () => {
+        await this.setupChatView();
+      }
+    });
+    if (this.app.isMobile) {
+      this.setupMobileView();
+    } else {
+      this.app.workspace.onLayoutReady(() => {
+        this.setupChatView();
       });
-      if (this.app.isMobile) {
-        this.setupMobileView();
-      } else {
-        this.app.workspace.onLayoutReady(() => {
-          this.setupChatView();
+    }
+  }
+  async setupMobileView() {
+    try {
+      await this.waitForWorkspaceReady();
+      if (document.readyState !== "complete") {
+        await new Promise((resolve) => {
+          window.addEventListener("load", resolve, { once: true });
         });
       }
-    });
+      await new Promise((resolve) => setTimeout(resolve, 1e3));
+      await this.setupChatView();
+      this.logToFile("GOKU mobile initialization successful", "info");
+    } catch (error) {
+      console.error("GOKU: Mobile setup error:", error);
+      this.logToFile(`GOKU mobile initialization failed: ${error.message}`, "error");
+      setTimeout(() => {
+        this.setupChatView().catch((e) => {
+          console.error("GOKU: Retry failed:", e);
+          this.logToFile(`GOKU retry failed: ${e.message}`, "error");
+        });
+      }, 2e3);
+    }
   }
-  setupMobileView() {
-    return __async(this, null, function* () {
-      try {
-        yield this.waitForWorkspaceReady();
-        yield new Promise((resolve) => setTimeout(resolve, 500));
-        yield this.setupChatView();
-        this.logToFile("GOKU mobile initialization successful", "info");
-      } catch (error) {
-        console.error("GOKU: Mobile setup error:", error);
-        this.logToFile(`GOKU mobile initialization failed: ${error.message}`, "error");
-        setTimeout(() => {
-          this.setupChatView().catch(
-            (e) => console.error("GOKU: Retry failed:", e)
-          );
-        }, 1e3);
+  async waitForWorkspaceReady() {
+    return new Promise((resolve) => {
+      if (this.app.workspace.layoutReady) {
+        resolve();
+        return;
       }
-    });
-  }
-  waitForWorkspaceReady() {
-    return __async(this, null, function* () {
-      return new Promise((resolve) => {
-        if (this.app.workspace.layoutReady) {
+      let attempts = 0;
+      const maxAttempts = 50;
+      const checkReady = () => {
+        attempts++;
+        if (this.app.workspace.layoutReady || attempts >= maxAttempts) {
           resolve();
-          return;
+        } else {
+          setTimeout(checkReady, 100);
         }
-        let attempts = 0;
-        const maxAttempts = 50;
-        const checkReady = () => {
-          attempts++;
-          if (this.app.workspace.layoutReady || attempts >= maxAttempts) {
-            resolve();
-          } else {
-            setTimeout(checkReady, 100);
-          }
-        };
-        setTimeout(checkReady, 100);
-      });
+      };
+      setTimeout(checkReady, 100);
     });
   }
-  setupChatView() {
-    return __async(this, null, function* () {
-      try {
-        const { workspace } = this.app;
-        workspace.detachLeavesOfType(CHAT_VIEW_TYPE);
-        let targetLeaf;
-        if (this.app.isMobile) {
-          targetLeaf = workspace.getLeaf("tab");
-        } else {
-          targetLeaf = workspace.getLeaf(false);
-        }
-        yield targetLeaf.setViewState({
-          type: CHAT_VIEW_TYPE,
-          active: true
-        });
-        workspace.revealLeaf(targetLeaf);
-        workspace.setActiveLeaf(targetLeaf, { focus: true });
-      } catch (error) {
-        console.error("GOKU: Setup error:", error);
-        this.logToFile(`GOKU setup error: ${error.message}`, "error");
+  async setupChatView() {
+    try {
+      const { workspace } = this.app;
+      workspace.detachLeavesOfType(CHAT_VIEW_TYPE);
+      let targetLeaf;
+      if (this.app.isMobile) {
+        targetLeaf = workspace.getLeaf("tab");
+      } else {
+        targetLeaf = workspace.getLeaf(false);
       }
-    });
+      await targetLeaf.setViewState({
+        type: CHAT_VIEW_TYPE,
+        active: true
+      });
+      workspace.revealLeaf(targetLeaf);
+      workspace.setActiveLeaf(targetLeaf, { focus: true });
+    } catch (error) {
+      console.error("GOKU: Setup error:", error);
+      this.logToFile(`GOKU setup error: ${error.message}`, "error");
+    }
   }
   logToFile(message, level = "info") {
     const timestamp = (/* @__PURE__ */ new Date()).toISOString();

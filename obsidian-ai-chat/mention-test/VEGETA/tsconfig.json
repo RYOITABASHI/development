@@ -3,7 +3,7 @@
     "target": "ES6",
     "module": "commonjs",
     "lib": ["ES6", "DOM"],
-    "jsx": "react-jsx",
+    "jsx": "react",
     "moduleResolution": "Node",
     "outDir": "dist",
     "rootDir": "src",

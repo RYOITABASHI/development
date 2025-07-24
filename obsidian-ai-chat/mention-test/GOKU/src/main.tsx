@@ -33,8 +33,15 @@ class GokuMultiModelPlugin extends Plugin {
             // Mobile-specific initialization with improved timing
             await this.waitForWorkspaceReady();
             
+            // Wait for DOM to be fully ready on mobile
+            if (document.readyState !== 'complete') {
+                await new Promise(resolve => {
+                    window.addEventListener('load', resolve, { once: true });
+                });
+            }
+            
             // Additional delay for mobile to ensure all components are loaded
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
             await this.setupChatView();
             this.logToFile('GOKU mobile initialization successful', 'info');
@@ -44,10 +51,11 @@ class GokuMultiModelPlugin extends Plugin {
             
             // Retry setup after a delay if initial attempt fails
             setTimeout(() => {
-                this.setupChatView().catch(e => 
-                    console.error('GOKU: Retry failed:', e)
-                );
-            }, 1000);
+                this.setupChatView().catch(e => {
+                    console.error('GOKU: Retry failed:', e);
+                    this.logToFile(`GOKU retry failed: ${e.message}`, 'error');
+                });
+            }, 2000);
         }
     }
 
