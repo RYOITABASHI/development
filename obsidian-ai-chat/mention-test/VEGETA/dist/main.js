@@ -32628,7 +32628,16 @@ class EditorView extends obsidian.ItemView {
 const conductor = "";
 class VegetaTerminalPlugin extends obsidian.Plugin {
   async onload() {
-    this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf));
+    console.log("VEGETA: Plugin loading started");
+    this.logToFile("VEGETA plugin loading started", "info");
+    try {
+      this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf));
+      console.log("VEGETA: View registered successfully");
+      this.logToFile("View registered successfully", "info");
+    } catch (error) {
+      console.error("VEGETA: Failed to register view:", error);
+      this.logToFile(`Failed to register view: ${error}`, "error");
+    }
     this.addRibbonIcon("terminal-square", "Open VEGETA‐Terminal", async () => {
       await this.setupTerminalView();
     });
@@ -32640,8 +32649,12 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
       }
     });
     if (this.app.isMobile) {
+      console.log("VEGETA: Mobile environment detected");
+      this.logToFile("Mobile environment detected", "info");
       this.setupMobileView();
     } else {
+      console.log("VEGETA: Desktop environment detected");
+      this.logToFile("Desktop environment detected", "info");
       this.app.workspace.onLayoutReady(() => {
         this.setupTerminalView();
       });

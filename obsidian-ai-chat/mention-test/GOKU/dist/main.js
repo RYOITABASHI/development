@@ -32763,21 +32763,45 @@ class ChatView extends obsidian.ItemView {
     return "GOKU‐AI Chat";
   }
   async onOpen() {
-    this.containerEl.empty();
-    this.containerEl.style.width = "100%";
-    this.containerEl.style.height = "100%";
-    this.containerEl.style.overflow = "hidden";
-    this.containerEl.style.position = "relative";
-    this.injectConductorStyles();
-    const container = this.containerEl.createDiv();
-    container.addClass("conductor-chat-container");
-    container.style.width = "100%";
-    container.style.height = "100%";
-    this.createDynamicBorderPane();
-    this.root = client.createRoot(container);
-    this.root.render(
-      /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorChatPane, {}) }) })
-    );
+    console.log("GOKU ChatView: onOpen called");
+    try {
+      this.containerEl.empty();
+      this.containerEl.style.width = "100%";
+      this.containerEl.style.height = "100%";
+      this.containerEl.style.overflow = "hidden";
+      this.containerEl.style.position = "relative";
+      console.log("GOKU ChatView: Container prepared");
+      this.injectConductorStyles();
+      console.log("GOKU ChatView: Styles injected");
+      const container = this.containerEl.createDiv();
+      container.addClass("conductor-chat-container");
+      container.style.width = "100%";
+      container.style.height = "100%";
+      console.log("GOKU ChatView: Container div created");
+      try {
+        this.createDynamicBorderPane();
+        console.log("GOKU ChatView: Border pane created");
+      } catch (borderError) {
+        console.error("GOKU ChatView: Border pane creation failed:", borderError);
+      }
+      console.log("GOKU ChatView: Creating React root");
+      if (!client || !client.createRoot) {
+        throw new Error("ReactDOM.createRoot is not available");
+      }
+      this.root = client.createRoot(container);
+      console.log("GOKU ChatView: React root created");
+      this.root.render(
+        /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorChatPane, {}) }) })
+      );
+      console.log("GOKU ChatView: React component rendered");
+    } catch (error) {
+      console.error("GOKU ChatView: Failed to open view:", error);
+      this.containerEl.empty();
+      const errorDiv = this.containerEl.createDiv();
+      errorDiv.setText(`GOKU Chat View Error: ${error.message}`);
+      errorDiv.style.padding = "20px";
+      errorDiv.style.color = "red";
+    }
   }
   injectConductorStyles() {
     if (document.getElementById("conductor-styles"))
@@ -32983,7 +33007,16 @@ class ChatView extends obsidian.ItemView {
 const conductor = "";
 class GokuMultiModelPlugin extends obsidian.Plugin {
   async onload() {
-    this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf));
+    console.log("GOKU: Plugin loading started");
+    this.logToFile("GOKU plugin loading started", "info");
+    try {
+      this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf));
+      console.log("GOKU: View registered successfully");
+      this.logToFile("View registered successfully", "info");
+    } catch (error) {
+      console.error("GOKU: Failed to register view:", error);
+      this.logToFile(`Failed to register view: ${error}`, "error");
+    }
     this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", async () => {
       await this.setupChatView();
     });
@@ -32995,8 +33028,12 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
       }
     });
     if (this.app.isMobile) {
+      console.log("GOKU: Mobile environment detected");
+      this.logToFile("Mobile environment detected", "info");
       this.setupMobileView();
     } else {
+      console.log("GOKU: Desktop environment detected");
+      this.logToFile("Desktop environment detected", "info");
       this.app.workspace.onLayoutReady(() => {
         this.setupChatView();
       });
@@ -33044,21 +33081,36 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
     });
   }
   async setupChatView() {
+    console.log("GOKU: setupChatView called");
+    this.logToFile("setupChatView called", "info");
     try {
       const { workspace } = this.app;
       workspace.detachLeavesOfType(CHAT_VIEW_TYPE);
       let targetLeaf;
       if (this.app.isMobile) {
+        console.log("GOKU: Creating mobile leaf");
+        this.logToFile("Creating mobile leaf", "info");
         targetLeaf = workspace.getLeaf("tab");
+        if (!targetLeaf) {
+          console.error("GOKU: Failed to get mobile leaf");
+          this.logToFile("Failed to get mobile leaf", "error");
+          targetLeaf = workspace.getLeaf(true);
+        }
       } else {
         targetLeaf = workspace.getLeaf(false);
       }
+      console.log("GOKU: Setting view state");
+      this.logToFile("Setting view state", "info");
       await targetLeaf.setViewState({
         type: CHAT_VIEW_TYPE,
         active: true
       });
+      console.log("GOKU: View state set successfully");
+      this.logToFile("View state set successfully", "info");
       workspace.revealLeaf(targetLeaf);
       workspace.setActiveLeaf(targetLeaf, { focus: true });
+      console.log("GOKU: Chat view setup completed");
+      this.logToFile("Chat view setup completed", "info");
     } catch (error) {
       console.error("GOKU: Setup error:", error);
       this.logToFile(`GOKU setup error: ${error.message}`, "error");

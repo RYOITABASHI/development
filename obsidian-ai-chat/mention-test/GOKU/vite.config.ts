@@ -3,7 +3,9 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-	plugins: [react()],
+	plugins: [react({
+		jsxRuntime: 'automatic'
+	})],
 	css: {
 		postcss: './postcss.config.js',
 	},

@@ -23,32 +23,61 @@ export class ChatView extends ItemView {
     }
 
     async onOpen() {
-        // Clear any existing content and create a proper container
-        this.containerEl.empty();
-        this.containerEl.style.width = '100%';
-        this.containerEl.style.height = '100%';
-        this.containerEl.style.overflow = 'hidden';
-        this.containerEl.style.position = 'relative';
+        console.log('GOKU ChatView: onOpen called');
+        try {
+            // Clear any existing content and create a proper container
+            this.containerEl.empty();
+            this.containerEl.style.width = '100%';
+            this.containerEl.style.height = '100%';
+            this.containerEl.style.overflow = 'hidden';
+            this.containerEl.style.position = 'relative';
+            console.log('GOKU ChatView: Container prepared');
         
-        // Force CSS injection for Obsidian environment
-        this.injectConductorStyles();
+            // Force CSS injection for Obsidian environment
+            this.injectConductorStyles();
+            console.log('GOKU ChatView: Styles injected');
         
-        const container = this.containerEl.createDiv();
-        container.addClass('conductor-chat-container');
-        container.style.width = '100%';
-        container.style.height = '100%';
+            const container = this.containerEl.createDiv();
+            container.addClass('conductor-chat-container');
+            container.style.width = '100%';
+            container.style.height = '100%';
+            console.log('GOKU ChatView: Container div created');
         
-        // Create dynamic border pane
-        this.createDynamicBorderPane();
+            // Create dynamic border pane
+            try {
+                this.createDynamicBorderPane();
+                console.log('GOKU ChatView: Border pane created');
+            } catch (borderError) {
+                console.error('GOKU ChatView: Border pane creation failed:', borderError);
+            }
         
-        this.root = ReactDOM.createRoot(container);
-        this.root.render(
-            <React.StrictMode>
-                <ConductorProvider>
-                    <ConductorChatPane />
-                </ConductorProvider>
-            </React.StrictMode>
-        );
+            console.log('GOKU ChatView: Creating React root');
+            
+            // Check if ReactDOM is available
+            if (!ReactDOM || !ReactDOM.createRoot) {
+                throw new Error('ReactDOM.createRoot is not available');
+            }
+            
+            this.root = ReactDOM.createRoot(container);
+            console.log('GOKU ChatView: React root created');
+            
+            this.root.render(
+                <React.StrictMode>
+                    <ConductorProvider>
+                        <ConductorChatPane />
+                    </ConductorProvider>
+                </React.StrictMode>
+            );
+            console.log('GOKU ChatView: React component rendered');
+        } catch (error) {
+            console.error('GOKU ChatView: Failed to open view:', error);
+            // Fallback UI for debugging
+            this.containerEl.empty();
+            const errorDiv = this.containerEl.createDiv();
+            errorDiv.setText(`GOKU Chat View Error: ${error.message}`);
+            errorDiv.style.padding = '20px';
+            errorDiv.style.color = 'red';
+        }
     }
 
     private injectConductorStyles() {
