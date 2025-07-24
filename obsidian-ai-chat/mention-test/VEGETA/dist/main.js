@@ -32434,11 +32434,12 @@ const ConductorOutputPane = () => {
 };
 const EDITOR_VIEW_TYPE = "conductor-editor-view";
 class EditorView extends obsidian.ItemView {
-  constructor(leaf) {
+  constructor(leaf, plugin) {
     super(leaf);
     this.root = null;
     this.borderPane = null;
     this.resizeObserver = null;
+    this.plugin = plugin;
   }
   getViewType() {
     return EDITOR_VIEW_TYPE;
@@ -32447,21 +32448,58 @@ class EditorView extends obsidian.ItemView {
     return "VEGETA-Terminal";
   }
   async onOpen() {
-    this.containerEl.empty();
-    this.containerEl.style.width = "100%";
-    this.containerEl.style.height = "100%";
-    this.containerEl.style.overflow = "hidden";
-    this.containerEl.style.position = "relative";
-    this.injectConductorStyles();
-    const container = this.containerEl.createDiv();
-    container.addClass("conductor-editor-container");
-    container.style.width = "100%";
-    container.style.height = "100%";
-    this.createDynamicBorderPane();
-    this.root = client.createRoot(container);
-    this.root.render(
-      /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorOutputPane, {}) }) })
-    );
+    var _a, _b;
+    console.log("VEGETA EditorView: onOpen called");
+    try {
+      this.containerEl.empty();
+      this.containerEl.style.width = "100%";
+      this.containerEl.style.height = "100%";
+      this.containerEl.style.overflow = "hidden";
+      this.containerEl.style.position = "relative";
+      console.log("VEGETA EditorView: Container prepared");
+      this.injectConductorStyles();
+      console.log("VEGETA EditorView: Styles injected");
+      const container = this.containerEl.createDiv();
+      container.addClass("conductor-editor-container");
+      container.style.width = "100%";
+      container.style.height = "100%";
+      container.style.display = "flex";
+      container.style.flexDirection = "column";
+      console.log("VEGETA EditorView: Container div created");
+      try {
+        this.createDynamicBorderPane();
+        console.log("VEGETA EditorView: Border pane created");
+      } catch (borderError) {
+        console.error("VEGETA EditorView: Border pane creation failed:", borderError);
+        if ((_a = this.plugin) == null ? void 0 : _a.logToVaultFile) {
+          await this.plugin.logToVaultFile(borderError);
+        }
+      }
+      console.log("VEGETA EditorView: Creating React root");
+      if (!client || !client.createRoot) {
+        throw new Error("ReactDOM.createRoot is not available");
+      }
+      if (obsidian.Platform.isMobile) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        console.log("VEGETA EditorView: Mobile delay completed");
+      }
+      this.root = client.createRoot(container);
+      console.log("VEGETA EditorView: React root created");
+      this.root.render(
+        /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorOutputPane, {}) }) })
+      );
+      console.log("VEGETA EditorView: React component rendered");
+    } catch (error) {
+      console.error("VEGETA EditorView: Failed to open view:", error);
+      if ((_b = this.plugin) == null ? void 0 : _b.logToVaultFile) {
+        await this.plugin.logToVaultFile(error);
+      }
+      this.containerEl.empty();
+      const errorDiv = this.containerEl.createDiv();
+      errorDiv.setText(`VEGETA Editor View Error: ${error.message}`);
+      errorDiv.style.padding = "20px";
+      errorDiv.style.color = "red";
+    }
   }
   injectConductorStyles() {
     if (document.getElementById("conductor-editor-styles"))
@@ -32575,6 +32613,10 @@ class EditorView extends obsidian.ItemView {
     document.head.appendChild(style);
   }
   createDynamicBorderPane() {
+    if (obsidian.Platform.isMobile) {
+      console.log("VEGETA EditorView: Skipping border pane on mobile");
+      return;
+    }
     this.borderPane = this.containerEl.createDiv();
     this.borderPane.addClass("vegeta-pane");
     this.borderPane.style.position = "absolute";
@@ -32614,6 +32656,7 @@ class EditorView extends obsidian.ItemView {
     });
   }
   async onClose() {
+    console.log("VEGETA EditorView: Closing view");
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
@@ -32622,7 +32665,13 @@ class EditorView extends obsidian.ItemView {
       this.root.unmount();
       this.root = null;
     }
-    this.borderPane = null;
+    if (this.borderPane) {
+      this.borderPane.remove();
+      this.borderPane = null;
+    }
+    if (obsidian.Platform.isMobile) {
+      this.containerEl.empty();
+    }
   }
 }
 const conductor = "";
@@ -32630,17 +32679,27 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
   async onload() {
     console.log("VEGETA: Plugin loading started");
     this.logToFile("VEGETA plugin loading started", "info");
+    await this.logToVaultFile(`VEGETA plugin loading - Platform: ${this.app.isMobile ? "MOBILE" : "DESKTOP"}, App version: ${this.app.vault.adapter.appId || "unknown"}`);
     try {
-      this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf));
+      this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
       console.log("VEGETA: View registered successfully");
       this.logToFile("View registered successfully", "info");
     } catch (error) {
       console.error("VEGETA: Failed to register view:", error);
       this.logToFile(`Failed to register view: ${error}`, "error");
+      await this.logToVaultFile(error);
     }
-    this.addRibbonIcon("terminal-square", "Open VEGETA‐Terminal", async () => {
-      await this.setupTerminalView();
-    });
+    try {
+      this.addRibbonIcon("terminal-square", "Open VEGETA‐Terminal", async () => {
+        await this.setupTerminalView();
+      });
+      console.log("VEGETA: Ribbon icon added");
+      this.logToFile("Ribbon icon added", "info");
+    } catch (error) {
+      console.error("VEGETA: Failed to add ribbon icon:", error);
+      this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
+      await this.logToVaultFile(error);
+    }
     this.addCommand({
       id: "setup-vegeta-terminal",
       name: "Setup VEGETA‐Terminal",
@@ -32648,10 +32707,17 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
         await this.setupTerminalView();
       }
     });
-    if (this.app.isMobile) {
+    if (obsidian.Platform.isMobile || this.app.isMobile) {
       console.log("VEGETA: Mobile environment detected");
       this.logToFile("Mobile environment detected", "info");
-      this.setupMobileView();
+      await this.logToVaultFile("モバイル環境で起動");
+      if (this.app.workspace.layoutReady) {
+        await this.setupMobileView();
+      } else {
+        this.app.workspace.onLayoutReady(async () => {
+          await this.setupMobileView();
+        });
+      }
     } else {
       console.log("VEGETA: Desktop environment detected");
       this.logToFile("Desktop environment detected", "info");
@@ -32663,22 +32729,31 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
   async setupMobileView() {
     try {
       await this.waitForWorkspaceReady();
+      await this.logToVaultFile("Mobile: workspace ready");
       if (document.readyState !== "complete") {
+        await this.logToVaultFile("Mobile: waiting for DOM complete");
         await new Promise((resolve) => {
           window.addEventListener("load", resolve, { once: true });
         });
       }
+      await this.logToVaultFile("Mobile: DOM ready");
       await new Promise((resolve) => setTimeout(resolve, 1e3));
+      await this.logToVaultFile("Mobile: additional delay completed");
       await this.setupTerminalView();
       this.logToFile("VEGETA mobile initialization successful", "info");
+      await this.logToVaultFile("Mobile: initialization successful");
     } catch (error) {
       console.error("VEGETA: Mobile setup error:", error);
       this.logToFile(`VEGETA mobile initialization failed: ${error.message}`, "error");
-      setTimeout(() => {
-        this.setupTerminalView().catch((e) => {
+      await this.logToVaultFile(error);
+      setTimeout(async () => {
+        try {
+          await this.setupTerminalView();
+        } catch (e) {
           console.error("VEGETA: Retry failed:", e);
           this.logToFile(`VEGETA retry failed: ${e.message}`, "error");
-        });
+          await this.logToVaultFile(e);
+        }
       }, 2e3);
     }
   }
@@ -32708,14 +32783,22 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
       const { workspace } = this.app;
       workspace.detachLeavesOfType(EDITOR_VIEW_TYPE);
       let targetLeaf;
-      if (this.app.isMobile) {
+      if (obsidian.Platform.isMobile || this.app.isMobile) {
         console.log("VEGETA: Creating mobile leaf");
         this.logToFile("Creating mobile leaf", "info");
-        targetLeaf = workspace.getLeaf("tab");
-        if (!targetLeaf) {
-          targetLeaf = workspace.getLeaf(true);
-          console.warn("VEGETA: Fallback: created new leaf for mobile");
-          this.logToFile("Fallback: created new leaf for mobile", "warn");
+        await this.logToVaultFile("Mobile: attempting to create leaf");
+        const existingLeaves = workspace.getLeavesOfType(EDITOR_VIEW_TYPE);
+        if (existingLeaves.length > 0) {
+          targetLeaf = existingLeaves[0];
+          await this.logToVaultFile("Mobile: reusing existing leaf");
+        } else {
+          targetLeaf = workspace.getMostRecentLeaf();
+          if (!targetLeaf) {
+            targetLeaf = workspace.getLeaf(true);
+            await this.logToVaultFile("Mobile: created new leaf");
+          } else {
+            await this.logToVaultFile("Mobile: using most recent leaf");
+          }
         }
       } else {
         targetLeaf = workspace.getRightLeaf(false);
@@ -32736,16 +32819,38 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
     } catch (error) {
       console.error("VEGETA: Setup error:", error);
       this.logToFile(`VEGETA setup error: ${error.message}`, "error");
+      await this.logToVaultFile(error);
     }
   }
   logToFile(message, level = "info") {
     const timestamp = (/* @__PURE__ */ new Date()).toISOString();
     const logEntry = `[${timestamp}] [VEGETA] [${level.toUpperCase()}] ${message}
 `;
-    const logPath = ".vegeta.log";
+    const logPath = obsidian.normalizePath(".vegeta.log");
     this.app.vault.adapter.append(logPath, logEntry).catch((err) => {
       console.error("Failed to write to log file:", err);
     });
+  }
+  async logToVaultFile(error) {
+    try {
+      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      const errorMessage = error instanceof Error ? `${error.name}: ${error.message}
+Stack: ${error.stack}` : String(error);
+      const logEntry = `[${timestamp}] [VEGETA] ERROR:
+${errorMessage}
+
+`;
+      const logDir = obsidian.normalizePath("90_Log");
+      const logPath = obsidian.normalizePath(`${logDir}/myplugin.log`);
+      try {
+        await this.app.vault.adapter.stat(logDir);
+      } catch (e) {
+        await this.app.vault.adapter.mkdir(logDir);
+      }
+      await this.app.vault.adapter.append(logPath, logEntry);
+    } catch (logError) {
+      console.error("VEGETA: Failed to write to vault log:", logError);
+    }
   }
   onunload() {
     this.logToFile("VEGETA plugin unloaded", "info");

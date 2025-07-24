@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf, Platform } from "obsidian";
 import ReactDOM from "react-dom/client";
 import React from "react";
 import { ConductorProvider } from "../contexts/ConductorContext";
@@ -9,9 +9,11 @@ export class ChatView extends ItemView {
     private root: ReactDOM.Root | null = null;
     private borderPane: HTMLElement | null = null;
     private resizeObserver: ResizeObserver | null = null;
+    private plugin: any;
 
-    constructor(leaf: WorkspaceLeaf) {
+    constructor(leaf: WorkspaceLeaf, plugin?: any) {
         super(leaf);
+        this.plugin = plugin;
     }
 
     getViewType() {
@@ -41,6 +43,8 @@ export class ChatView extends ItemView {
             container.addClass('conductor-chat-container');
             container.style.width = '100%';
             container.style.height = '100%';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
             console.log('GOKU ChatView: Container div created');
         
             // Create dynamic border pane
@@ -49,6 +53,9 @@ export class ChatView extends ItemView {
                 console.log('GOKU ChatView: Border pane created');
             } catch (borderError) {
                 console.error('GOKU ChatView: Border pane creation failed:', borderError);
+                if (this.plugin?.logToVaultFile) {
+                    await this.plugin.logToVaultFile(borderError);
+                }
             }
         
             console.log('GOKU ChatView: Creating React root');
@@ -56,6 +63,12 @@ export class ChatView extends ItemView {
             // Check if ReactDOM is available
             if (!ReactDOM || !ReactDOM.createRoot) {
                 throw new Error('ReactDOM.createRoot is not available');
+            }
+            
+            // Add small delay for mobile to ensure DOM is ready
+            if (Platform.isMobile) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                console.log('GOKU ChatView: Mobile delay completed');
             }
             
             this.root = ReactDOM.createRoot(container);
@@ -71,6 +84,9 @@ export class ChatView extends ItemView {
             console.log('GOKU ChatView: React component rendered');
         } catch (error) {
             console.error('GOKU ChatView: Failed to open view:', error);
+            if (this.plugin?.logToVaultFile) {
+                await this.plugin.logToVaultFile(error);
+            }
             // Fallback UI for debugging
             this.containerEl.empty();
             const errorDiv = this.containerEl.createDiv();
@@ -233,6 +249,11 @@ export class ChatView extends ItemView {
     }
 
     private createDynamicBorderPane() {
+        // Skip border pane on mobile for performance
+        if (Platform.isMobile) {
+            console.log('GOKU ChatView: Skipping border pane on mobile');
+            return;
+        }
         // Create the border pane element
         this.borderPane = this.containerEl.createDiv();
         this.borderPane.addClass('goku-pane');
@@ -288,6 +309,7 @@ export class ChatView extends ItemView {
     }
 
     async onClose() {
+        console.log('GOKU ChatView: Closing view');
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
             this.resizeObserver = null;
@@ -298,6 +320,14 @@ export class ChatView extends ItemView {
             this.root = null;
         }
         
-        this.borderPane = null;
+        if (this.borderPane) {
+            this.borderPane.remove();
+            this.borderPane = null;
+        }
+        
+        // Clear container to free memory on mobile
+        if (Platform.isMobile) {
+            this.containerEl.empty();
+        }
     }
 }

@@ -32750,11 +32750,12 @@ const ConductorChatPane = () => {
 };
 const CHAT_VIEW_TYPE = "conductor-chat-view";
 class ChatView extends obsidian.ItemView {
-  constructor(leaf) {
+  constructor(leaf, plugin) {
     super(leaf);
     this.root = null;
     this.borderPane = null;
     this.resizeObserver = null;
+    this.plugin = plugin;
   }
   getViewType() {
     return CHAT_VIEW_TYPE;
@@ -32763,6 +32764,7 @@ class ChatView extends obsidian.ItemView {
     return "GOKU‐AI Chat";
   }
   async onOpen() {
+    var _a, _b;
     console.log("GOKU ChatView: onOpen called");
     try {
       this.containerEl.empty();
@@ -32777,16 +32779,25 @@ class ChatView extends obsidian.ItemView {
       container.addClass("conductor-chat-container");
       container.style.width = "100%";
       container.style.height = "100%";
+      container.style.display = "flex";
+      container.style.flexDirection = "column";
       console.log("GOKU ChatView: Container div created");
       try {
         this.createDynamicBorderPane();
         console.log("GOKU ChatView: Border pane created");
       } catch (borderError) {
         console.error("GOKU ChatView: Border pane creation failed:", borderError);
+        if ((_a = this.plugin) == null ? void 0 : _a.logToVaultFile) {
+          await this.plugin.logToVaultFile(borderError);
+        }
       }
       console.log("GOKU ChatView: Creating React root");
       if (!client || !client.createRoot) {
         throw new Error("ReactDOM.createRoot is not available");
+      }
+      if (obsidian.Platform.isMobile) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        console.log("GOKU ChatView: Mobile delay completed");
       }
       this.root = client.createRoot(container);
       console.log("GOKU ChatView: React root created");
@@ -32796,6 +32807,9 @@ class ChatView extends obsidian.ItemView {
       console.log("GOKU ChatView: React component rendered");
     } catch (error) {
       console.error("GOKU ChatView: Failed to open view:", error);
+      if ((_b = this.plugin) == null ? void 0 : _b.logToVaultFile) {
+        await this.plugin.logToVaultFile(error);
+      }
       this.containerEl.empty();
       const errorDiv = this.containerEl.createDiv();
       errorDiv.setText(`GOKU Chat View Error: ${error.message}`);
@@ -32954,6 +32968,10 @@ class ChatView extends obsidian.ItemView {
     document.head.appendChild(style);
   }
   createDynamicBorderPane() {
+    if (obsidian.Platform.isMobile) {
+      console.log("GOKU ChatView: Skipping border pane on mobile");
+      return;
+    }
     this.borderPane = this.containerEl.createDiv();
     this.borderPane.addClass("goku-pane");
     this.borderPane.style.position = "absolute";
@@ -32993,6 +33011,7 @@ class ChatView extends obsidian.ItemView {
     });
   }
   async onClose() {
+    console.log("GOKU ChatView: Closing view");
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
@@ -33001,7 +33020,13 @@ class ChatView extends obsidian.ItemView {
       this.root.unmount();
       this.root = null;
     }
-    this.borderPane = null;
+    if (this.borderPane) {
+      this.borderPane.remove();
+      this.borderPane = null;
+    }
+    if (obsidian.Platform.isMobile) {
+      this.containerEl.empty();
+    }
   }
 }
 const conductor = "";
@@ -33009,17 +33034,27 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
   async onload() {
     console.log("GOKU: Plugin loading started");
     this.logToFile("GOKU plugin loading started", "info");
+    await this.logToVaultFile(`GOKU plugin loading - Platform: ${this.app.isMobile ? "MOBILE" : "DESKTOP"}, App version: ${this.app.vault.adapter.appId || "unknown"}`);
     try {
-      this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf));
+      this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this));
       console.log("GOKU: View registered successfully");
       this.logToFile("View registered successfully", "info");
     } catch (error) {
       console.error("GOKU: Failed to register view:", error);
       this.logToFile(`Failed to register view: ${error}`, "error");
+      await this.logToVaultFile(error);
     }
-    this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", async () => {
-      await this.setupChatView();
-    });
+    try {
+      this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", async () => {
+        await this.setupChatView();
+      });
+      console.log("GOKU: Ribbon icon added");
+      this.logToFile("Ribbon icon added", "info");
+    } catch (error) {
+      console.error("GOKU: Failed to add ribbon icon:", error);
+      this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
+      await this.logToVaultFile(error);
+    }
     this.addCommand({
       id: "setup-goku-chat",
       name: "Setup GOKU‐AI Chat",
@@ -33027,10 +33062,17 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
         await this.setupChatView();
       }
     });
-    if (this.app.isMobile) {
+    if (obsidian.Platform.isMobile || this.app.isMobile) {
       console.log("GOKU: Mobile environment detected");
       this.logToFile("Mobile environment detected", "info");
-      this.setupMobileView();
+      await this.logToVaultFile("モバイル環境で起動");
+      if (this.app.workspace.layoutReady) {
+        await this.setupMobileView();
+      } else {
+        this.app.workspace.onLayoutReady(async () => {
+          await this.setupMobileView();
+        });
+      }
     } else {
       console.log("GOKU: Desktop environment detected");
       this.logToFile("Desktop environment detected", "info");
@@ -33042,22 +33084,31 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
   async setupMobileView() {
     try {
       await this.waitForWorkspaceReady();
+      await this.logToVaultFile("Mobile: workspace ready");
       if (document.readyState !== "complete") {
+        await this.logToVaultFile("Mobile: waiting for DOM complete");
         await new Promise((resolve) => {
           window.addEventListener("load", resolve, { once: true });
         });
       }
+      await this.logToVaultFile("Mobile: DOM ready");
       await new Promise((resolve) => setTimeout(resolve, 1e3));
+      await this.logToVaultFile("Mobile: additional delay completed");
       await this.setupChatView();
       this.logToFile("GOKU mobile initialization successful", "info");
+      await this.logToVaultFile("Mobile: initialization successful");
     } catch (error) {
       console.error("GOKU: Mobile setup error:", error);
       this.logToFile(`GOKU mobile initialization failed: ${error.message}`, "error");
-      setTimeout(() => {
-        this.setupChatView().catch((e) => {
+      await this.logToVaultFile(error);
+      setTimeout(async () => {
+        try {
+          await this.setupChatView();
+        } catch (e) {
           console.error("GOKU: Retry failed:", e);
           this.logToFile(`GOKU retry failed: ${e.message}`, "error");
-        });
+          await this.logToVaultFile(e);
+        }
       }, 2e3);
     }
   }
@@ -33087,14 +33138,22 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
       const { workspace } = this.app;
       workspace.detachLeavesOfType(CHAT_VIEW_TYPE);
       let targetLeaf;
-      if (this.app.isMobile) {
+      if (obsidian.Platform.isMobile || this.app.isMobile) {
         console.log("GOKU: Creating mobile leaf");
         this.logToFile("Creating mobile leaf", "info");
-        targetLeaf = workspace.getLeaf("tab");
-        if (!targetLeaf) {
-          targetLeaf = workspace.getLeaf(true);
-          console.warn("GOKU: Fallback: created new leaf for mobile");
-          this.logToFile("Fallback: created new leaf for mobile", "warn");
+        await this.logToVaultFile("Mobile: attempting to create leaf");
+        const existingLeaves = workspace.getLeavesOfType(CHAT_VIEW_TYPE);
+        if (existingLeaves.length > 0) {
+          targetLeaf = existingLeaves[0];
+          await this.logToVaultFile("Mobile: reusing existing leaf");
+        } else {
+          targetLeaf = workspace.getMostRecentLeaf();
+          if (!targetLeaf) {
+            targetLeaf = workspace.getLeaf(true);
+            await this.logToVaultFile("Mobile: created new leaf");
+          } else {
+            await this.logToVaultFile("Mobile: using most recent leaf");
+          }
         }
       } else {
         targetLeaf = workspace.getLeaf(false);
@@ -33115,16 +33174,38 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
     } catch (error) {
       console.error("GOKU: Setup error:", error);
       this.logToFile(`GOKU setup error: ${error.message}`, "error");
+      await this.logToVaultFile(error);
     }
   }
   logToFile(message, level = "info") {
     const timestamp = (/* @__PURE__ */ new Date()).toISOString();
     const logEntry = `[${timestamp}] [GOKU] [${level.toUpperCase()}] ${message}
 `;
-    const logPath = ".goku.log";
+    const logPath = obsidian.normalizePath(".goku.log");
     this.app.vault.adapter.append(logPath, logEntry).catch((err) => {
       console.error("Failed to write to log file:", err);
     });
+  }
+  async logToVaultFile(error) {
+    try {
+      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      const errorMessage = error instanceof Error ? `${error.name}: ${error.message}
+Stack: ${error.stack}` : String(error);
+      const logEntry = `[${timestamp}] [GOKU] ERROR:
+${errorMessage}
+
+`;
+      const logDir = obsidian.normalizePath("90_Log");
+      const logPath = obsidian.normalizePath(`${logDir}/myplugin.log`);
+      try {
+        await this.app.vault.adapter.stat(logDir);
+      } catch (e) {
+        await this.app.vault.adapter.mkdir(logDir);
+      }
+      await this.app.vault.adapter.append(logPath, logEntry);
+    } catch (logError) {
+      console.error("GOKU: Failed to write to vault log:", logError);
+    }
   }
   onunload() {
     this.logToFile("GOKU plugin unloaded", "info");

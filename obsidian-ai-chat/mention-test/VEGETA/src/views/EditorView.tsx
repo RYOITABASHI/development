@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, WorkspaceLeaf, Platform } from "obsidian";
 import ReactDOM from "react-dom/client";
 import React from "react";
 import { ConductorProvider } from "../contexts/ConductorContext";
@@ -9,9 +9,11 @@ export class EditorView extends ItemView {
     private root: ReactDOM.Root | null = null;
     private borderPane: HTMLElement | null = null;
     private resizeObserver: ResizeObserver | null = null;
+    private plugin: any;
 
-    constructor(leaf: WorkspaceLeaf) {
+    constructor(leaf: WorkspaceLeaf, plugin?: any) {
         super(leaf);
+        this.plugin = plugin;
     }
 
     getViewType() {
@@ -23,32 +25,75 @@ export class EditorView extends ItemView {
     }
 
     async onOpen() {
-        // Clear any existing content and create a proper container
-        this.containerEl.empty();
-        this.containerEl.style.width = '100%';
-        this.containerEl.style.height = '100%';
-        this.containerEl.style.overflow = 'hidden';
-        this.containerEl.style.position = 'relative';
+        console.log('VEGETA EditorView: onOpen called');
+        try {
+            // Clear any existing content and create a proper container
+            this.containerEl.empty();
+            this.containerEl.style.width = '100%';
+            this.containerEl.style.height = '100%';
+            this.containerEl.style.overflow = 'hidden';
+            this.containerEl.style.position = 'relative';
+            console.log('VEGETA EditorView: Container prepared');
         
-        // Force CSS injection for Obsidian environment
-        this.injectConductorStyles();
+            // Force CSS injection for Obsidian environment
+            this.injectConductorStyles();
+            console.log('VEGETA EditorView: Styles injected');
         
-        const container = this.containerEl.createDiv();
-        container.addClass('conductor-editor-container');
-        container.style.width = '100%';
-        container.style.height = '100%';
+            const container = this.containerEl.createDiv();
+            container.addClass('conductor-editor-container');
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            console.log('VEGETA EditorView: Container div created');
         
-        // Create dynamic border pane
-        this.createDynamicBorderPane();
+            // Create dynamic border pane
+            try {
+                this.createDynamicBorderPane();
+                console.log('VEGETA EditorView: Border pane created');
+            } catch (borderError) {
+                console.error('VEGETA EditorView: Border pane creation failed:', borderError);
+                if (this.plugin?.logToVaultFile) {
+                    await this.plugin.logToVaultFile(borderError);
+                }
+            }
         
-        this.root = ReactDOM.createRoot(container);
-        this.root.render(
-            <React.StrictMode>
-                <ConductorProvider>
-                    <ConductorOutputPane />
-                </ConductorProvider>
-            </React.StrictMode>
-        );
+            console.log('VEGETA EditorView: Creating React root');
+            
+            // Check if ReactDOM is available
+            if (!ReactDOM || !ReactDOM.createRoot) {
+                throw new Error('ReactDOM.createRoot is not available');
+            }
+            
+            // Add small delay for mobile to ensure DOM is ready
+            if (Platform.isMobile) {
+                await new Promise(resolve => setTimeout(resolve, 200));
+                console.log('VEGETA EditorView: Mobile delay completed');
+            }
+            
+            this.root = ReactDOM.createRoot(container);
+            console.log('VEGETA EditorView: React root created');
+            
+            this.root.render(
+                <React.StrictMode>
+                    <ConductorProvider>
+                        <ConductorOutputPane />
+                    </ConductorProvider>
+                </React.StrictMode>
+            );
+            console.log('VEGETA EditorView: React component rendered');
+        } catch (error) {
+            console.error('VEGETA EditorView: Failed to open view:', error);
+            if (this.plugin?.logToVaultFile) {
+                await this.plugin.logToVaultFile(error);
+            }
+            // Fallback UI for debugging
+            this.containerEl.empty();
+            const errorDiv = this.containerEl.createDiv();
+            errorDiv.setText(`VEGETA Editor View Error: ${error.message}`);
+            errorDiv.style.padding = '20px';
+            errorDiv.style.color = 'red';
+        }
     }
 
     private injectConductorStyles() {
@@ -165,6 +210,11 @@ export class EditorView extends ItemView {
     }
 
     private createDynamicBorderPane() {
+        // Skip border pane on mobile for performance
+        if (Platform.isMobile) {
+            console.log('VEGETA EditorView: Skipping border pane on mobile');
+            return;
+        }
         // Create the border pane element
         this.borderPane = this.containerEl.createDiv();
         this.borderPane.addClass('vegeta-pane');
@@ -220,6 +270,7 @@ export class EditorView extends ItemView {
     }
 
     async onClose() {
+        console.log('VEGETA EditorView: Closing view');
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
             this.resizeObserver = null;
@@ -230,6 +281,14 @@ export class EditorView extends ItemView {
             this.root = null;
         }
         
-        this.borderPane = null;
+        if (this.borderPane) {
+            this.borderPane.remove();
+            this.borderPane = null;
+        }
+        
+        // Clear container to free memory on mobile
+        if (Platform.isMobile) {
+            this.containerEl.empty();
+        }
     }
 }

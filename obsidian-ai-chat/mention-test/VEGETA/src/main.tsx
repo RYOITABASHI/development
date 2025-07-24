@@ -1,4 +1,4 @@
-import { Plugin } from "obsidian";
+import { Plugin, Platform, normalizePath } from "obsidian";
 import { EditorView } from "./views/EditorView";
 import { EDITOR_VIEW_TYPE } from "./types/types";
 import "./styles/conductor.css";
@@ -7,18 +7,29 @@ class VegetaTerminalPlugin extends Plugin {
     async onload() {
         console.log('VEGETA: Plugin loading started');
         this.logToFile('VEGETA plugin loading started', 'info');
+        await this.logToVaultFile(`VEGETA plugin loading - Platform: ${this.app.isMobile ? 'MOBILE' : 'DESKTOP'}, App version: ${this.app.vault.adapter.appId || 'unknown'}`);
         try {
-            this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf));
+            this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
             console.log('VEGETA: View registered successfully');
             this.logToFile('View registered successfully', 'info');
         } catch (error) {
             console.error('VEGETA: Failed to register view:', error);
             this.logToFile(`Failed to register view: ${error}`, 'error');
+            await this.logToVaultFile(error);
         }
 
-        this.addRibbonIcon('terminal-square', 'Open VEGETA‐Terminal', async () => {
-            await this.setupTerminalView();
-        });
+        // Add ribbon icon with mobile-safe implementation
+        try {
+            this.addRibbonIcon('terminal-square', 'Open VEGETA‐Terminal', async () => {
+                await this.setupTerminalView();
+            });
+            console.log('VEGETA: Ribbon icon added');
+            this.logToFile('Ribbon icon added', 'info');
+        } catch (error) {
+            console.error('VEGETA: Failed to add ribbon icon:', error);
+            this.logToFile(`Failed to add ribbon icon: ${error}`, 'error');
+            await this.logToVaultFile(error);
+        }
 
         this.addCommand({
             id: "setup-vegeta-terminal",
@@ -28,10 +39,19 @@ class VegetaTerminalPlugin extends Plugin {
             },
         });
 
-        if (this.app.isMobile) {
+        if (Platform.isMobile || this.app.isMobile) {
             console.log('VEGETA: Mobile environment detected');
             this.logToFile('Mobile environment detected', 'info');
-            this.setupMobileView();
+            await this.logToVaultFile('モバイル環境で起動');
+            
+            // Ensure mobile view setup happens after layout is ready
+            if (this.app.workspace.layoutReady) {
+                await this.setupMobileView();
+            } else {
+                this.app.workspace.onLayoutReady(async () => {
+                    await this.setupMobileView();
+                });
+            }
         } else {
             console.log('VEGETA: Desktop environment detected');
             this.logToFile('Desktop environment detected', 'info');
@@ -45,29 +65,38 @@ class VegetaTerminalPlugin extends Plugin {
         try {
             // Mobile-specific initialization with improved timing
             await this.waitForWorkspaceReady();
+            await this.logToVaultFile('Mobile: workspace ready');
             
             // Wait for DOM to be fully ready on mobile
             if (document.readyState !== 'complete') {
+                await this.logToVaultFile('Mobile: waiting for DOM complete');
                 await new Promise(resolve => {
                     window.addEventListener('load', resolve, { once: true });
                 });
             }
+            await this.logToVaultFile('Mobile: DOM ready');
             
             // Additional delay for mobile to ensure all components are loaded
             await new Promise(resolve => setTimeout(resolve, 1000));
+            await this.logToVaultFile('Mobile: additional delay completed');
             
             await this.setupTerminalView();
             this.logToFile('VEGETA mobile initialization successful', 'info');
+            await this.logToVaultFile('Mobile: initialization successful');
         } catch (error) {
             console.error('VEGETA: Mobile setup error:', error);
             this.logToFile(`VEGETA mobile initialization failed: ${error.message}`, 'error');
+            await this.logToVaultFile(error);
             
             // Retry setup after a delay if initial attempt fails
-            setTimeout(() => {
-                this.setupTerminalView().catch(e => {
+            setTimeout(async () => {
+                try {
+                    await this.setupTerminalView();
+                } catch (e) {
                     console.error('VEGETA: Retry failed:', e);
                     this.logToFile(`VEGETA retry failed: ${e.message}`, 'error');
-                });
+                    await this.logToVaultFile(e);
+                }
             }, 2000);
         }
     }
@@ -104,15 +133,25 @@ class VegetaTerminalPlugin extends Plugin {
 
             // Mobile-compatible pane selection
             let targetLeaf;
-            if (this.app.isMobile) {
+            if (Platform.isMobile || this.app.isMobile) {
                 console.log('VEGETA: Creating mobile leaf');
                 this.logToFile('Creating mobile leaf', 'info');
-                // On mobile, use a new tab since mobile may not have right pane
-                targetLeaf = workspace.getLeaf('tab');
-                if (!targetLeaf) {
-                    targetLeaf = workspace.getLeaf(true); // fallback
-                    console.warn('VEGETA: Fallback: created new leaf for mobile');
-                    this.logToFile('Fallback: created new leaf for mobile', 'warn');
+                await this.logToVaultFile('Mobile: attempting to create leaf');
+                
+                // Mobile: Try different methods to get a leaf
+                const existingLeaves = workspace.getLeavesOfType(EDITOR_VIEW_TYPE);
+                if (existingLeaves.length > 0) {
+                    targetLeaf = existingLeaves[0];
+                    await this.logToVaultFile('Mobile: reusing existing leaf');
+                } else {
+                    // Try to get active leaf first
+                    targetLeaf = workspace.getMostRecentLeaf();
+                    if (!targetLeaf) {
+                        targetLeaf = workspace.getLeaf(true);
+                        await this.logToVaultFile('Mobile: created new leaf');
+                    } else {
+                        await this.logToVaultFile('Mobile: using most recent leaf');
+                    }
                 }
             } else {
                 // Force VEGETA to open in right pane on desktop
@@ -138,6 +177,7 @@ class VegetaTerminalPlugin extends Plugin {
         } catch (error) {
             console.error('VEGETA: Setup error:', error);
             this.logToFile(`VEGETA setup error: ${error.message}`, 'error');
+            await this.logToVaultFile(error);
         }
     }
 
@@ -146,10 +186,35 @@ class VegetaTerminalPlugin extends Plugin {
         const logEntry = `[${timestamp}] [VEGETA] [${level.toUpperCase()}] ${message}\n`;
         
         // Use Obsidian's file system API
-        const logPath = '.vegeta.log';
+        const logPath = normalizePath('.vegeta.log');
         this.app.vault.adapter.append(logPath, logEntry).catch(err => {
             console.error('Failed to write to log file:', err);
         });
+    }
+
+    async logToVaultFile(error: Error | string): Promise<void> {
+        try {
+            const timestamp = new Date().toISOString();
+            const errorMessage = error instanceof Error ? 
+                `${error.name}: ${error.message}\nStack: ${error.stack}` : 
+                String(error);
+            const logEntry = `[${timestamp}] [VEGETA] ERROR:\n${errorMessage}\n\n`;
+            
+            // Ensure log directory exists
+            const logDir = normalizePath('90_Log');
+            const logPath = normalizePath(`${logDir}/myplugin.log`);
+            
+            try {
+                await this.app.vault.adapter.stat(logDir);
+            } catch {
+                await this.app.vault.adapter.mkdir(logDir);
+            }
+            
+            // Append to log file
+            await this.app.vault.adapter.append(logPath, logEntry);
+        } catch (logError) {
+            console.error('VEGETA: Failed to write to vault log:', logError);
+        }
     }
 
     onunload() {
