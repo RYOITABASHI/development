@@ -27,12 +27,20 @@ export class ChatView extends ItemView {
     async onOpen() {
         console.log('GOKU ChatView: onOpen called');
         try {
+            // Mobile guard with Platform.isMobile fallback
+            const isMobile = Platform.isMobile || this.app.isMobile;
+            
             // Clear any existing content and create a proper container
             this.containerEl.empty();
             this.containerEl.style.width = '100%';
             this.containerEl.style.height = '100%';
             this.containerEl.style.overflow = 'hidden';
             this.containerEl.style.position = 'relative';
+            
+            // Add mobile-specific class
+            if (isMobile) {
+                this.containerEl.addClass('mobile-chat-view');
+            }
             console.log('GOKU ChatView: Container prepared');
         
             // Force CSS injection for Obsidian environment
@@ -66,7 +74,7 @@ export class ChatView extends ItemView {
             }
             
             // Add small delay for mobile to ensure DOM is ready
-            if (Platform.isMobile) {
+            if (isMobile) {
                 await new Promise(resolve => setTimeout(resolve, 200));
                 console.log('GOKU ChatView: Mobile delay completed');
             }
@@ -267,7 +275,8 @@ export class ChatView extends ItemView {
 
     private createDynamicBorderPane() {
         // Skip border pane on mobile for performance
-        if (Platform.isMobile) {
+        const isMobile = Platform.isMobile || this.app.isMobile;
+        if (isMobile) {
             console.log('GOKU ChatView: Skipping border pane on mobile');
             return;
         }
@@ -343,7 +352,8 @@ export class ChatView extends ItemView {
         }
         
         // Clear container to free memory on mobile
-        if (Platform.isMobile) {
+        const isMobile = Platform.isMobile || this.app.isMobile;
+        if (isMobile) {
             this.containerEl.empty();
         }
     }

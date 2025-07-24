@@ -50,8 +50,11 @@ export class EditorView extends ItemView {
     async onOpen() {
         console.log('VEGETA EditorView: onOpen called');
         try {
+            // Mobile guard with Platform.isMobile fallback
+            const isMobile = Platform.isMobile || this.app.isMobile;
+            
             // Ensure we're ready on mobile
-            if (Platform.isMobile) {
+            if (isMobile) {
                 await this.waitForContainerReady();
             }
             
@@ -63,7 +66,7 @@ export class EditorView extends ItemView {
             this.containerEl.style.position = 'relative';
             
             // Add mobile-specific class
-            if (Platform.isMobile) {
+            if (isMobile) {
                 this.containerEl.addClass('mobile-terminal-view');
             }
             
@@ -100,7 +103,7 @@ export class EditorView extends ItemView {
             }
             
             // Ensure container is visible before rendering React
-            if (Platform.isMobile) {
+            if (isMobile) {
                 // Force layout recalculation
                 this.containerEl.offsetHeight;
                 
@@ -266,7 +269,8 @@ export class EditorView extends ItemView {
 
     private createDynamicBorderPane() {
         // Skip border pane on mobile for performance
-        if (Platform.isMobile) {
+        const isMobile = Platform.isMobile || this.app.isMobile;
+        if (isMobile) {
             console.log('VEGETA EditorView: Skipping border pane on mobile');
             return;
         }
@@ -342,7 +346,8 @@ export class EditorView extends ItemView {
         }
         
         // Clear container to free memory on mobile
-        if (Platform.isMobile) {
+        const isMobile = Platform.isMobile || this.app.isMobile;
+        if (isMobile) {
             this.containerEl.empty();
         }
     }

@@ -32767,11 +32767,15 @@ class ChatView extends obsidian.ItemView {
     var _a, _b;
     console.log("GOKU ChatView: onOpen called");
     try {
+      const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
       this.containerEl.empty();
       this.containerEl.style.width = "100%";
       this.containerEl.style.height = "100%";
       this.containerEl.style.overflow = "hidden";
       this.containerEl.style.position = "relative";
+      if (isMobile) {
+        this.containerEl.addClass("mobile-chat-view");
+      }
       console.log("GOKU ChatView: Container prepared");
       this.injectConductorStyles();
       console.log("GOKU ChatView: Styles injected");
@@ -32795,7 +32799,7 @@ class ChatView extends obsidian.ItemView {
       if (!client || !client.createRoot) {
         throw new Error("ReactDOM.createRoot is not available");
       }
-      if (obsidian.Platform.isMobile) {
+      if (isMobile) {
         await new Promise((resolve) => setTimeout(resolve, 200));
         console.log("GOKU ChatView: Mobile delay completed");
       }
@@ -32985,7 +32989,8 @@ class ChatView extends obsidian.ItemView {
     document.head.appendChild(style);
   }
   createDynamicBorderPane() {
-    if (obsidian.Platform.isMobile) {
+    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
+    if (isMobile) {
       console.log("GOKU ChatView: Skipping border pane on mobile");
       return;
     }
@@ -33041,7 +33046,8 @@ class ChatView extends obsidian.ItemView {
       this.borderPane.remove();
       this.borderPane = null;
     }
-    if (obsidian.Platform.isMobile) {
+    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
+    if (isMobile) {
       this.containerEl.empty();
     }
   }
@@ -33062,26 +33068,38 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
       this.statusBarItem = this.addStatusBarItem();
       this.statusBarItem.setText("GOKU initializing...");
     }
-    try {
-      this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this));
-      console.log("GOKU: View registered successfully");
-      this.logToFile("View registered successfully", "info");
-    } catch (error) {
-      console.error("GOKU: Failed to register view:", error);
-      this.logToFile(`Failed to register view: ${error}`, "error");
-      await this.logToVaultFile(error);
-    }
-    try {
-      this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", async () => {
-        await this.setupChatView();
-      });
-      console.log("GOKU: Ribbon icon added");
-      this.logToFile("Ribbon icon added", "info");
-    } catch (error) {
-      console.error("GOKU: Failed to add ribbon icon:", error);
-      this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
-      await this.logToVaultFile(error);
-    }
+    this.app.workspace.onLayoutReady(() => {
+      try {
+        this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this));
+        console.log("GOKU: View registered successfully");
+        this.logToFile("View registered successfully", "info");
+      } catch (error) {
+        console.error("GOKU: Failed to register view:", error);
+        this.logToFile(`Failed to register view: ${error}`, "error");
+        this.logToVaultFile(error);
+      }
+      try {
+        this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", async () => {
+          await this.setupChatView();
+        });
+        console.log("GOKU: Ribbon icon added");
+        this.logToFile("Ribbon icon added", "info");
+      } catch (error) {
+        console.error("GOKU: Failed to add ribbon icon:", error);
+        this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
+        this.logToVaultFile(error);
+      }
+      if (obsidian.Platform.isMobile || this.app.isMobile) {
+        console.log("GOKU: Mobile environment detected");
+        this.logToFile("Mobile environment detected", "info");
+        this.logToVaultFile("モバイル環境で起動");
+        this.setupMobileView();
+      } else {
+        console.log("GOKU: Desktop environment detected");
+        this.logToFile("Desktop environment detected", "info");
+        this.setupChatView();
+      }
+    });
     this.addCommand({
       id: "setup-goku-chat",
       name: "Setup GOKU‐AI Chat",
@@ -33089,24 +33107,6 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
         await this.setupChatView();
       }
     });
-    if (obsidian.Platform.isMobile || this.app.isMobile) {
-      console.log("GOKU: Mobile environment detected");
-      this.logToFile("Mobile environment detected", "info");
-      await this.logToVaultFile("モバイル環境で起動");
-      if (this.app.workspace.layoutReady) {
-        await this.setupMobileView();
-      } else {
-        this.app.workspace.onLayoutReady(async () => {
-          await this.setupMobileView();
-        });
-      }
-    } else {
-      console.log("GOKU: Desktop environment detected");
-      this.logToFile("Desktop environment detected", "info");
-      this.app.workspace.onLayoutReady(() => {
-        this.setupChatView();
-      });
-    }
   }
   async setupMobileView() {
     try {

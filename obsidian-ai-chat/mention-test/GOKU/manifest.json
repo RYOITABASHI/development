@@ -6,8 +6,7 @@
 	"description": "Advanced multi-model AI chat interface with real-time conversations and model switching capabilities",
 	"main": "main.js",
 	"styles": "style.css",
-	"minAppVersion": "1.4.16",
-	"mobile": true,
+	"minAppVersion": "1.0.0",
 	"isDesktopOnly": false,
 	"fundingUrl": {
 		"Buy Me a Coffee": "https://www.buymeacoffee.com/rebuildfactoryz"

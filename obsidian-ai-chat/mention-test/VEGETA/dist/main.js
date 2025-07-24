@@ -32472,7 +32472,8 @@ class EditorView extends obsidian.ItemView {
     var _a, _b;
     console.log("VEGETA EditorView: onOpen called");
     try {
-      if (obsidian.Platform.isMobile) {
+      const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
+      if (isMobile) {
         await this.waitForContainerReady();
       }
       this.containerEl.empty();
@@ -32480,7 +32481,7 @@ class EditorView extends obsidian.ItemView {
       this.containerEl.style.height = "100%";
       this.containerEl.style.overflow = "hidden";
       this.containerEl.style.position = "relative";
-      if (obsidian.Platform.isMobile) {
+      if (isMobile) {
         this.containerEl.addClass("mobile-terminal-view");
       }
       console.log("VEGETA EditorView: Container prepared");
@@ -32506,7 +32507,7 @@ class EditorView extends obsidian.ItemView {
       if (!client || !client.createRoot) {
         throw new Error("ReactDOM.createRoot is not available");
       }
-      if (obsidian.Platform.isMobile) {
+      if (isMobile) {
         this.containerEl.offsetHeight;
         await this.waitForContainerSize();
         console.log("VEGETA EditorView: Mobile container sized");
@@ -32658,7 +32659,8 @@ class EditorView extends obsidian.ItemView {
     document.head.appendChild(style);
   }
   createDynamicBorderPane() {
-    if (obsidian.Platform.isMobile) {
+    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
+    if (isMobile) {
       console.log("VEGETA EditorView: Skipping border pane on mobile");
       return;
     }
@@ -32714,7 +32716,8 @@ class EditorView extends obsidian.ItemView {
       this.borderPane.remove();
       this.borderPane = null;
     }
-    if (obsidian.Platform.isMobile) {
+    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
+    if (isMobile) {
       this.containerEl.empty();
     }
   }
@@ -32735,26 +32738,38 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
       this.statusBarItem = this.addStatusBarItem();
       this.statusBarItem.setText("VEGETA initializing...");
     }
-    try {
-      this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
-      console.log("VEGETA: View registered successfully");
-      this.logToFile("View registered successfully", "info");
-    } catch (error) {
-      console.error("VEGETA: Failed to register view:", error);
-      this.logToFile(`Failed to register view: ${error}`, "error");
-      await this.logToVaultFile(error);
-    }
-    try {
-      this.addRibbonIcon("terminal-square", "Open VEGETA‐Terminal", async () => {
-        await this.setupTerminalView();
-      });
-      console.log("VEGETA: Ribbon icon added");
-      this.logToFile("Ribbon icon added", "info");
-    } catch (error) {
-      console.error("VEGETA: Failed to add ribbon icon:", error);
-      this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
-      await this.logToVaultFile(error);
-    }
+    this.app.workspace.onLayoutReady(() => {
+      try {
+        this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
+        console.log("VEGETA: View registered successfully");
+        this.logToFile("View registered successfully", "info");
+      } catch (error) {
+        console.error("VEGETA: Failed to register view:", error);
+        this.logToFile(`Failed to register view: ${error}`, "error");
+        this.logToVaultFile(error);
+      }
+      try {
+        this.addRibbonIcon("terminal-square", "Open VEGETA‐Terminal", async () => {
+          await this.setupTerminalView();
+        });
+        console.log("VEGETA: Ribbon icon added");
+        this.logToFile("Ribbon icon added", "info");
+      } catch (error) {
+        console.error("VEGETA: Failed to add ribbon icon:", error);
+        this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
+        this.logToVaultFile(error);
+      }
+      if (obsidian.Platform.isMobile || this.app.isMobile) {
+        console.log("VEGETA: Mobile environment detected");
+        this.logToFile("Mobile environment detected", "info");
+        this.logToVaultFile("モバイル環境で起動");
+        this.setupMobileView();
+      } else {
+        console.log("VEGETA: Desktop environment detected");
+        this.logToFile("Desktop environment detected", "info");
+        this.setupTerminalView();
+      }
+    });
     this.addCommand({
       id: "setup-vegeta-terminal",
       name: "Setup VEGETA‐Terminal",
@@ -32762,24 +32777,6 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
         await this.setupTerminalView();
       }
     });
-    if (obsidian.Platform.isMobile || this.app.isMobile) {
-      console.log("VEGETA: Mobile environment detected");
-      this.logToFile("Mobile environment detected", "info");
-      await this.logToVaultFile("モバイル環境で起動");
-      if (this.app.workspace.layoutReady) {
-        await this.setupMobileView();
-      } else {
-        this.app.workspace.onLayoutReady(async () => {
-          await this.setupMobileView();
-        });
-      }
-    } else {
-      console.log("VEGETA: Desktop environment detected");
-      this.logToFile("Desktop environment detected", "info");
-      this.app.workspace.onLayoutReady(() => {
-        this.setupTerminalView();
-      });
-    }
   }
   async setupMobileView() {
     try {

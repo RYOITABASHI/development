@@ -18,28 +18,43 @@ class VegetaTerminalPlugin extends Plugin {
             this.statusBarItem = this.addStatusBarItem();
             this.statusBarItem.setText('VEGETA initializing...');
         }
-        try {
-            this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
-            console.log('VEGETA: View registered successfully');
-            this.logToFile('View registered successfully', 'info');
-        } catch (error) {
-            console.error('VEGETA: Failed to register view:', error);
-            this.logToFile(`Failed to register view: ${error}`, 'error');
-            await this.logToVaultFile(error);
-        }
 
-        // Add ribbon icon with mobile-safe implementation
-        try {
-            this.addRibbonIcon('terminal-square', 'Open VEGETA‐Terminal', async () => {
-                await this.setupTerminalView();
-            });
-            console.log('VEGETA: Ribbon icon added');
-            this.logToFile('Ribbon icon added', 'info');
-        } catch (error) {
-            console.error('VEGETA: Failed to add ribbon icon:', error);
-            this.logToFile(`Failed to add ribbon icon: ${error}`, 'error');
-            await this.logToVaultFile(error);
-        }
+        // Wrap all UI registration inside onLayoutReady for mobile compatibility
+        this.app.workspace.onLayoutReady(() => {
+            try {
+                this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
+                console.log('VEGETA: View registered successfully');
+                this.logToFile('View registered successfully', 'info');
+            } catch (error) {
+                console.error('VEGETA: Failed to register view:', error);
+                this.logToFile(`Failed to register view: ${error}`, 'error');
+                this.logToVaultFile(error);
+            }
+
+            // Add ribbon icon with mobile-safe implementation
+            try {
+                this.addRibbonIcon('terminal-square', 'Open VEGETA‐Terminal', async () => {
+                    await this.setupTerminalView();
+                });
+                console.log('VEGETA: Ribbon icon added');
+                this.logToFile('Ribbon icon added', 'info');
+            } catch (error) {
+                console.error('VEGETA: Failed to add ribbon icon:', error);
+                this.logToFile(`Failed to add ribbon icon: ${error}`, 'error');
+                this.logToVaultFile(error);
+            }
+
+            if (Platform.isMobile || this.app.isMobile) {
+                console.log('VEGETA: Mobile environment detected');
+                this.logToFile('Mobile environment detected', 'info');
+                this.logToVaultFile('モバイル環境で起動');
+                this.setupMobileView();
+            } else {
+                console.log('VEGETA: Desktop environment detected');
+                this.logToFile('Desktop environment detected', 'info');
+                this.setupTerminalView();
+            }
+        });
 
         this.addCommand({
             id: "setup-vegeta-terminal",
@@ -48,27 +63,6 @@ class VegetaTerminalPlugin extends Plugin {
                 await this.setupTerminalView();
             },
         });
-
-        if (Platform.isMobile || this.app.isMobile) {
-            console.log('VEGETA: Mobile environment detected');
-            this.logToFile('Mobile environment detected', 'info');
-            await this.logToVaultFile('モバイル環境で起動');
-            
-            // Ensure mobile view setup happens after layout is ready
-            if (this.app.workspace.layoutReady) {
-                await this.setupMobileView();
-            } else {
-                this.app.workspace.onLayoutReady(async () => {
-                    await this.setupMobileView();
-                });
-            }
-        } else {
-            console.log('VEGETA: Desktop environment detected');
-            this.logToFile('Desktop environment detected', 'info');
-            this.app.workspace.onLayoutReady(() => {
-                this.setupTerminalView();
-            });
-        }
     }
 
     async setupMobileView() {
