@@ -32823,6 +32823,23 @@ class ChatView extends obsidian.ItemView {
     const style = document.createElement("style");
     style.id = "conductor-styles";
     style.textContent = `
+            /* Mobile-specific fixes */
+            .workspace-leaf-content[data-type="goku-chat"] {
+                padding: 0 !important;
+                overflow: hidden !important;
+                position: relative !important;
+            }
+            
+            .mobile-chat-view {
+                width: 100% !important;
+                height: 100% !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+            }
+            
             /* Layout and Structure */
             .conductor-chat-container .w-full { width: 100% !important; }
             .conductor-chat-container .h-full { height: 100% !important; }
@@ -33031,10 +33048,20 @@ class ChatView extends obsidian.ItemView {
 }
 const conductor = "";
 class GokuMultiModelPlugin extends obsidian.Plugin {
+  constructor() {
+    super(...arguments);
+    this.retryCount = 0;
+    this.maxRetries = 5;
+    this.statusBarItem = null;
+  }
   async onload() {
     console.log("GOKU: Plugin loading started");
     this.logToFile("GOKU plugin loading started", "info");
     await this.logToVaultFile(`GOKU plugin loading - Platform: ${this.app.isMobile ? "MOBILE" : "DESKTOP"}, App version: ${this.app.vault.adapter.appId || "unknown"}`);
+    if (obsidian.Platform.isMobile) {
+      this.statusBarItem = this.addStatusBarItem();
+      this.statusBarItem.setText("GOKU initializing...");
+    }
     try {
       this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this));
       console.log("GOKU: View registered successfully");
@@ -33085,32 +33112,49 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
     try {
       await this.waitForWorkspaceReady();
       await this.logToVaultFile("Mobile: workspace ready");
-      if (document.readyState !== "complete") {
-        await this.logToVaultFile("Mobile: waiting for DOM complete");
-        await new Promise((resolve) => {
-          window.addEventListener("load", resolve, { once: true });
-        });
+      await this.waitForMobileReady();
+      await this.logToVaultFile("Mobile: app fully ready");
+      const success = await this.setupChatViewWithRetry();
+      if (success) {
+        this.logToFile("GOKU mobile initialization successful", "info");
+        await this.logToVaultFile("Mobile: initialization successful");
+        this.updateStatusBar("GOKU ready");
+      } else {
+        throw new Error("Failed to setup view after retries");
       }
-      await this.logToVaultFile("Mobile: DOM ready");
-      await new Promise((resolve) => setTimeout(resolve, 1e3));
-      await this.logToVaultFile("Mobile: additional delay completed");
-      await this.setupChatView();
-      this.logToFile("GOKU mobile initialization successful", "info");
-      await this.logToVaultFile("Mobile: initialization successful");
     } catch (error) {
       console.error("GOKU: Mobile setup error:", error);
       this.logToFile(`GOKU mobile initialization failed: ${error.message}`, "error");
       await this.logToVaultFile(error);
-      setTimeout(async () => {
-        try {
-          await this.setupChatView();
-        } catch (e) {
-          console.error("GOKU: Retry failed:", e);
-          this.logToFile(`GOKU retry failed: ${e.message}`, "error");
-          await this.logToVaultFile(e);
-        }
-      }, 2e3);
+      this.updateStatusBar("GOKU failed to load");
     }
+  }
+  async waitForMobileReady() {
+    var _a, _b, _c;
+    if (document.readyState !== "complete") {
+      await new Promise((resolve) => {
+        window.addEventListener("load", resolve, { once: true });
+      });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    while ((_c = (_b = (_a = this.app.workspace.activeLeaf) == null ? void 0 : _a.view) == null ? void 0 : _b.containerEl) == null ? void 0 : _c.classList.contains("is-loading")) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+  async setupChatViewWithRetry() {
+    for (let i = 0; i < this.maxRetries; i++) {
+      try {
+        await this.setupChatView();
+        return true;
+      } catch (error) {
+        console.warn(`GOKU: Setup attempt ${i + 1} failed:`, error);
+        await this.logToVaultFile(`Retry ${i + 1}: ${error.message}`);
+        if (i < this.maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1e3));
+        }
+      }
+    }
+    return false;
   }
   async waitForWorkspaceReady() {
     return new Promise((resolve) => {
@@ -33148,15 +33192,28 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
           await this.logToVaultFile("Mobile: reusing existing leaf");
         } else {
           targetLeaf = workspace.getMostRecentLeaf();
+          if (!targetLeaf || !targetLeaf.view) {
+            const rootSplit = workspace.rootSplit;
+            if (rootSplit) {
+              targetLeaf = workspace.getLeaf(true);
+              await this.logToVaultFile("Mobile: created new leaf from root split");
+            }
+          }
           if (!targetLeaf) {
-            targetLeaf = workspace.getLeaf(true);
-            await this.logToVaultFile("Mobile: created new leaf");
+            targetLeaf = workspace.getLeaf("tab");
+            if (!targetLeaf) {
+              targetLeaf = workspace.getLeaf(true);
+            }
+            await this.logToVaultFile("Mobile: created new leaf (fallback)");
           } else {
             await this.logToVaultFile("Mobile: using most recent leaf");
           }
         }
       } else {
         targetLeaf = workspace.getLeaf(false);
+      }
+      if (!targetLeaf) {
+        throw new Error("Failed to create or get leaf");
       }
       console.log("GOKU: Setting view state");
       this.logToFile("Setting view state", "info");
@@ -33207,9 +33264,17 @@ ${errorMessage}
       console.error("GOKU: Failed to write to vault log:", logError);
     }
   }
+  updateStatusBar(text) {
+    if (this.statusBarItem) {
+      this.statusBarItem.setText(text);
+    }
+  }
   onunload() {
     this.logToFile("GOKU plugin unloaded", "info");
     this.app.workspace.detachLeavesOfType(CHAT_VIEW_TYPE);
+    if (this.statusBarItem) {
+      this.statusBarItem.remove();
+    }
   }
 }
 module.exports = GokuMultiModelPlugin;

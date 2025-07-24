@@ -103,6 +103,23 @@ export class ChatView extends ItemView {
         const style = document.createElement('style');
         style.id = 'conductor-styles';
         style.textContent = `
+            /* Mobile-specific fixes */
+            .workspace-leaf-content[data-type="goku-chat"] {
+                padding: 0 !important;
+                overflow: hidden !important;
+                position: relative !important;
+            }
+            
+            .mobile-chat-view {
+                width: 100% !important;
+                height: 100% !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+            }
+            
             /* Layout and Structure */
             .conductor-chat-container .w-full { width: 100% !important; }
             .conductor-chat-container .h-full { height: 100% !important; }

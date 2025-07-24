@@ -4,10 +4,20 @@ import { EDITOR_VIEW_TYPE } from "./types/types";
 import "./styles/conductor.css";
 
 class VegetaTerminalPlugin extends Plugin {
+    private retryCount = 0;
+    private maxRetries = 5;
+    private statusBarItem: HTMLElement | null = null;
+
     async onload() {
         console.log('VEGETA: Plugin loading started');
         this.logToFile('VEGETA plugin loading started', 'info');
         await this.logToVaultFile(`VEGETA plugin loading - Platform: ${this.app.isMobile ? 'MOBILE' : 'DESKTOP'}, App version: ${this.app.vault.adapter.appId || 'unknown'}`);
+        
+        // Create status bar item for mobile feedback
+        if (Platform.isMobile) {
+            this.statusBarItem = this.addStatusBarItem();
+            this.statusBarItem.setText('VEGETA initializing...');
+        }
         try {
             this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
             console.log('VEGETA: View registered successfully');
@@ -67,38 +77,61 @@ class VegetaTerminalPlugin extends Plugin {
             await this.waitForWorkspaceReady();
             await this.logToVaultFile('Mobile: workspace ready');
             
-            // Wait for DOM to be fully ready on mobile
-            if (document.readyState !== 'complete') {
-                await this.logToVaultFile('Mobile: waiting for DOM complete');
-                await new Promise(resolve => {
-                    window.addEventListener('load', resolve, { once: true });
-                });
+            // Ensure full DOM and mobile app readiness
+            await this.waitForMobileReady();
+            await this.logToVaultFile('Mobile: app fully ready');
+            
+            // Try to setup view with retry mechanism
+            const success = await this.setupTerminalViewWithRetry();
+            
+            if (success) {
+                this.logToFile('VEGETA mobile initialization successful', 'info');
+                await this.logToVaultFile('Mobile: initialization successful');
+                this.updateStatusBar('VEGETA ready');
+            } else {
+                throw new Error('Failed to setup view after retries');
             }
-            await this.logToVaultFile('Mobile: DOM ready');
-            
-            // Additional delay for mobile to ensure all components are loaded
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            await this.logToVaultFile('Mobile: additional delay completed');
-            
-            await this.setupTerminalView();
-            this.logToFile('VEGETA mobile initialization successful', 'info');
-            await this.logToVaultFile('Mobile: initialization successful');
         } catch (error) {
             console.error('VEGETA: Mobile setup error:', error);
             this.logToFile(`VEGETA mobile initialization failed: ${error.message}`, 'error');
             await this.logToVaultFile(error);
-            
-            // Retry setup after a delay if initial attempt fails
-            setTimeout(async () => {
-                try {
-                    await this.setupTerminalView();
-                } catch (e) {
-                    console.error('VEGETA: Retry failed:', e);
-                    this.logToFile(`VEGETA retry failed: ${e.message}`, 'error');
-                    await this.logToVaultFile(e);
-                }
-            }, 2000);
+            this.updateStatusBar('VEGETA failed to load');
         }
+    }
+
+    async waitForMobileReady(): Promise<void> {
+        // Wait for DOM
+        if (document.readyState !== 'complete') {
+            await new Promise(resolve => {
+                window.addEventListener('load', resolve, { once: true });
+            });
+        }
+        
+        // Wait for Obsidian mobile app to be fully ready
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Wait for any active view transitions
+        while (this.app.workspace.activeLeaf?.view?.containerEl?.classList.contains('is-loading')) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+
+    async setupTerminalViewWithRetry(): Promise<boolean> {
+        for (let i = 0; i < this.maxRetries; i++) {
+            try {
+                await this.setupTerminalView();
+                return true;
+            } catch (error) {
+                console.warn(`VEGETA: Setup attempt ${i + 1} failed:`, error);
+                await this.logToVaultFile(`Retry ${i + 1}: ${error.message}`);
+                
+                if (i < this.maxRetries - 1) {
+                    // Exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                }
+            }
+        }
+        return false;
     }
 
     async waitForWorkspaceReady(): Promise<void> {
@@ -144,11 +177,25 @@ class VegetaTerminalPlugin extends Plugin {
                     targetLeaf = existingLeaves[0];
                     await this.logToVaultFile('Mobile: reusing existing leaf');
                 } else {
-                    // Try to get active leaf first
+                    // Try multiple approaches for mobile
                     targetLeaf = workspace.getMostRecentLeaf();
+                    
+                    if (!targetLeaf || !targetLeaf.view) {
+                        // Try to get the root split
+                        const rootSplit = workspace.rootSplit;
+                        if (rootSplit) {
+                            targetLeaf = workspace.getLeaf(true);
+                            await this.logToVaultFile('Mobile: created new leaf from root split');
+                        }
+                    }
+                    
                     if (!targetLeaf) {
-                        targetLeaf = workspace.getLeaf(true);
-                        await this.logToVaultFile('Mobile: created new leaf');
+                        // Last resort: create in active pane
+                        targetLeaf = workspace.getLeaf('tab');
+                        if (!targetLeaf) {
+                            targetLeaf = workspace.getLeaf(true);
+                        }
+                        await this.logToVaultFile('Mobile: created new leaf (fallback)');
                     } else {
                         await this.logToVaultFile('Mobile: using most recent leaf');
                     }
@@ -156,6 +203,10 @@ class VegetaTerminalPlugin extends Plugin {
             } else {
                 // Force VEGETA to open in right pane on desktop
                 targetLeaf = workspace.getRightLeaf(false);
+            }
+            
+            if (!targetLeaf) {
+                throw new Error('Failed to create or get leaf');
             }
             
             console.log('VEGETA: Setting view state');
@@ -217,9 +268,18 @@ class VegetaTerminalPlugin extends Plugin {
         }
     }
 
+    updateStatusBar(text: string) {
+        if (this.statusBarItem) {
+            this.statusBarItem.setText(text);
+        }
+    }
+
     onunload() {
         this.logToFile('VEGETA plugin unloaded', 'info');
         this.app.workspace.detachLeavesOfType(EDITOR_VIEW_TYPE);
+        if (this.statusBarItem) {
+            this.statusBarItem.remove();
+        }
     }
 }
 

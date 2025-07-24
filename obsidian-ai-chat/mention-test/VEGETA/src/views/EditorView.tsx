@@ -16,6 +16,29 @@ export class EditorView extends ItemView {
         this.plugin = plugin;
     }
 
+    async waitForContainerReady(): Promise<void> {
+        let attempts = 0;
+        while (attempts < 20) {
+            if (this.containerEl && this.containerEl.parentElement) {
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+    }
+
+    async waitForContainerSize(): Promise<void> {
+        let attempts = 0;
+        while (attempts < 20) {
+            const rect = this.containerEl.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 50));
+            attempts++;
+        }
+    }
+
     getViewType() {
         return EDITOR_VIEW_TYPE;
     }
@@ -27,12 +50,23 @@ export class EditorView extends ItemView {
     async onOpen() {
         console.log('VEGETA EditorView: onOpen called');
         try {
+            // Ensure we're ready on mobile
+            if (Platform.isMobile) {
+                await this.waitForContainerReady();
+            }
+            
             // Clear any existing content and create a proper container
             this.containerEl.empty();
             this.containerEl.style.width = '100%';
             this.containerEl.style.height = '100%';
             this.containerEl.style.overflow = 'hidden';
             this.containerEl.style.position = 'relative';
+            
+            // Add mobile-specific class
+            if (Platform.isMobile) {
+                this.containerEl.addClass('mobile-terminal-view');
+            }
+            
             console.log('VEGETA EditorView: Container prepared');
         
             // Force CSS injection for Obsidian environment
@@ -65,10 +99,14 @@ export class EditorView extends ItemView {
                 throw new Error('ReactDOM.createRoot is not available');
             }
             
-            // Add small delay for mobile to ensure DOM is ready
+            // Ensure container is visible before rendering React
             if (Platform.isMobile) {
-                await new Promise(resolve => setTimeout(resolve, 200));
-                console.log('VEGETA EditorView: Mobile delay completed');
+                // Force layout recalculation
+                this.containerEl.offsetHeight;
+                
+                // Wait for container to be properly sized
+                await this.waitForContainerSize();
+                console.log('VEGETA EditorView: Mobile container sized');
             }
             
             this.root = ReactDOM.createRoot(container);
@@ -103,6 +141,23 @@ export class EditorView extends ItemView {
         const style = document.createElement('style');
         style.id = 'conductor-editor-styles';
         style.textContent = `
+            /* Mobile-specific fixes */
+            .workspace-leaf-content[data-type="vegeta-terminal"] {
+                padding: 0 !important;
+                overflow: hidden !important;
+                position: relative !important;
+            }
+            
+            .mobile-terminal-view {
+                width: 100% !important;
+                height: 100% !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+            }
+            
             /* Layout and Structure */
             .conductor-editor-container .w-full { width: 100% !important; }
             .conductor-editor-container .h-full { height: 100% !important; }
