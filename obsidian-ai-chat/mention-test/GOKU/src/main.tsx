@@ -110,9 +110,9 @@ class GokuMultiModelPlugin extends Plugin {
                 // On mobile, use the main leaf or create a new one
                 targetLeaf = workspace.getLeaf('tab');
                 if (!targetLeaf) {
-                    console.error('GOKU: Failed to get mobile leaf');
-                    this.logToFile('Failed to get mobile leaf', 'error');
-                    targetLeaf = workspace.getLeaf(true);
+                    targetLeaf = workspace.getLeaf(true); // fallback
+                    console.warn('GOKU: Fallback: created new leaf for mobile');
+                    this.logToFile('Fallback: created new leaf for mobile', 'warn');
                 }
             } else {
                 // Force GOKU to open in center pane on desktop
@@ -127,6 +127,9 @@ class GokuMultiModelPlugin extends Plugin {
             });
             console.log('GOKU: View state set successfully');
             this.logToFile('View state set successfully', 'info');
+            
+            // Add delay for rendering stabilization
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             workspace.revealLeaf(targetLeaf);
             workspace.setActiveLeaf(targetLeaf, { focus: true });

@@ -32702,21 +32702,37 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
     });
   }
   async setupTerminalView() {
+    console.log("VEGETA: setupTerminalView called");
+    this.logToFile("setupTerminalView called", "info");
     try {
       const { workspace } = this.app;
       workspace.detachLeavesOfType(EDITOR_VIEW_TYPE);
       let targetLeaf;
       if (this.app.isMobile) {
+        console.log("VEGETA: Creating mobile leaf");
+        this.logToFile("Creating mobile leaf", "info");
         targetLeaf = workspace.getLeaf("tab");
+        if (!targetLeaf) {
+          targetLeaf = workspace.getLeaf(true);
+          console.warn("VEGETA: Fallback: created new leaf for mobile");
+          this.logToFile("Fallback: created new leaf for mobile", "warn");
+        }
       } else {
         targetLeaf = workspace.getRightLeaf(false);
       }
+      console.log("VEGETA: Setting view state");
+      this.logToFile("Setting view state", "info");
       await targetLeaf.setViewState({
         type: EDITOR_VIEW_TYPE,
         active: true
       });
+      console.log("VEGETA: View state set successfully");
+      this.logToFile("View state set successfully", "info");
+      await new Promise((resolve) => setTimeout(resolve, 500));
       workspace.revealLeaf(targetLeaf);
       workspace.setActiveLeaf(targetLeaf, { focus: true });
+      console.log("VEGETA: Terminal view setup completed");
+      this.logToFile("Terminal view setup completed", "info");
     } catch (error) {
       console.error("VEGETA: Setup error:", error);
       this.logToFile(`VEGETA setup error: ${error.message}`, "error");

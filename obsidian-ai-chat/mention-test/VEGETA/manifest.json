@@ -6,7 +6,8 @@
 	"description": "Professional terminal output interface with real-time command execution and ANSI color support",
 	"main": "main.js",
 	"styles": "style.css",
-	"minAppVersion": "0.15.0",
+	"minAppVersion": "1.4.16",
+	"mobile": true,
 	"isDesktopOnly": false,
 	"fundingUrl": {
 		"Buy Me a Coffee": "https://www.buymeacoffee.com/rebuildfactoryz"

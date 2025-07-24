@@ -33092,9 +33092,9 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
         this.logToFile("Creating mobile leaf", "info");
         targetLeaf = workspace.getLeaf("tab");
         if (!targetLeaf) {
-          console.error("GOKU: Failed to get mobile leaf");
-          this.logToFile("Failed to get mobile leaf", "error");
           targetLeaf = workspace.getLeaf(true);
+          console.warn("GOKU: Fallback: created new leaf for mobile");
+          this.logToFile("Fallback: created new leaf for mobile", "warn");
         }
       } else {
         targetLeaf = workspace.getLeaf(false);
@@ -33107,6 +33107,7 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
       });
       console.log("GOKU: View state set successfully");
       this.logToFile("View state set successfully", "info");
+      await new Promise((resolve) => setTimeout(resolve, 500));
       workspace.revealLeaf(targetLeaf);
       workspace.setActiveLeaf(targetLeaf, { focus: true });
       console.log("GOKU: Chat view setup completed");
