@@ -1,5 +1,72 @@
 "use strict";
 const obsidian = require("obsidian");
+function useDeviceType() {
+  var _a, _b;
+  const obsidianMobile = obsidian.Platform.isMobile;
+  const screenWidth = ((_a = window.screen) == null ? void 0 : _a.width) || window.innerWidth;
+  const screenHeight = ((_b = window.screen) == null ? void 0 : _b.height) || window.innerHeight;
+  const userAgent = navigator.userAgent.toLowerCase();
+  const mobileUserAgents = [
+    "android",
+    "iphone",
+    "ipad",
+    "ipod",
+    "blackberry",
+    "windows phone",
+    "mobile",
+    "tablet"
+  ];
+  const hasMobileUserAgent = mobileUserAgents.some((agent) => userAgent.includes(agent));
+  const smallScreen = screenWidth <= 768;
+  const tabletScreen = screenWidth > 768 && screenWidth <= 1024;
+  const isTablet = tabletScreen || userAgent.includes("tablet") || userAgent.includes("ipad");
+  const isMobile = obsidianMobile || hasMobileUserAgent || smallScreen;
+  const type = isMobile ? "mobile" : "pc";
+  console.log("Device Detection:", {
+    obsidianMobile,
+    hasMobileUserAgent,
+    smallScreen,
+    screenWidth,
+    screenHeight,
+    userAgent: userAgent.substring(0, 50) + "...",
+    finalType: type
+  });
+  return {
+    type,
+    isMobile,
+    isTablet,
+    screenWidth,
+    screenHeight,
+    userAgent
+  };
+}
+function getOptimalConfig(deviceInfo) {
+  if (deviceInfo.type === "mobile") {
+    return {
+      // Mobile-optimized settings
+      maxRetries: 3,
+      retryDelay: 500,
+      renderDelay: 300,
+      useSimplifiedUI: true,
+      enableBorderPane: false,
+      containerPadding: "0.25rem",
+      fontSize: "16px",
+      buttonMinSize: "44px"
+    };
+  } else {
+    return {
+      // PC-optimized settings
+      maxRetries: 5,
+      retryDelay: 1e3,
+      renderDelay: 100,
+      useSimplifiedUI: false,
+      enableBorderPane: true,
+      containerPadding: "0.5rem",
+      fontSize: "14px",
+      buttonMinSize: "32px"
+    };
+  }
+}
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -32432,8 +32499,8 @@ const ConductorOutputPane = () => {
     }
   );
 };
-const EDITOR_VIEW_TYPE = "conductor-editor-view";
-class EditorView extends obsidian.ItemView {
+const EDITOR_VIEW_TYPE = "vegeta-terminal";
+class PCEditorView extends obsidian.ItemView {
   constructor(leaf, plugin) {
     super(leaf);
     this.root = null;
@@ -32441,236 +32508,108 @@ class EditorView extends obsidian.ItemView {
     this.resizeObserver = null;
     this.plugin = plugin;
   }
-  async waitForContainerReady() {
-    let attempts = 0;
-    while (attempts < 20) {
-      if (this.containerEl && this.containerEl.parentElement) {
-        return;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      attempts++;
-    }
-  }
-  async waitForContainerSize() {
-    let attempts = 0;
-    while (attempts < 20) {
-      const rect = this.containerEl.getBoundingClientRect();
-      if (rect.width > 0 && rect.height > 0) {
-        return;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      attempts++;
-    }
-  }
   getViewType() {
     return EDITOR_VIEW_TYPE;
   }
   getDisplayText() {
-    return "VEGETA-Terminal";
+    return "VEGETA-Terminal (PC)";
   }
   async onOpen() {
     var _a, _b;
-    console.log("VEGETA EditorView: onOpen called");
+    console.log("VEGETA PC EditorView: onOpen called");
     try {
-      const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
-      if (isMobile) {
-        await this.waitForContainerReady();
-      }
       this.containerEl.empty();
       this.containerEl.style.width = "100%";
       this.containerEl.style.height = "100%";
       this.containerEl.style.overflow = "hidden";
       this.containerEl.style.position = "relative";
-      if (isMobile) {
-        this.containerEl.addClass("mobile-terminal-view");
-      }
-      console.log("VEGETA EditorView: Container prepared");
+      console.log("VEGETA PC EditorView: Container prepared");
       this.injectConductorStyles();
-      console.log("VEGETA EditorView: Styles injected");
+      console.log("VEGETA PC EditorView: Styles injected");
       const container = this.containerEl.createDiv();
-      container.addClass("conductor-editor-container");
+      container.addClass("conductor-editor-container", "pc-optimized");
       container.style.width = "100%";
       container.style.height = "100%";
       container.style.display = "flex";
       container.style.flexDirection = "column";
-      console.log("VEGETA EditorView: Container div created");
+      console.log("VEGETA PC EditorView: Container div created");
       try {
         this.createDynamicBorderPane();
-        console.log("VEGETA EditorView: Border pane created");
+        console.log("VEGETA PC EditorView: Border pane created");
       } catch (borderError) {
-        console.error("VEGETA EditorView: Border pane creation failed:", borderError);
+        console.error("VEGETA PC EditorView: Border pane creation failed:", borderError);
         if ((_a = this.plugin) == null ? void 0 : _a.logToVaultFile) {
           await this.plugin.logToVaultFile(borderError);
         }
       }
-      console.log("VEGETA EditorView: Creating React root");
+      console.log("VEGETA PC EditorView: Creating React root");
       if (!client || !client.createRoot) {
         throw new Error("ReactDOM.createRoot is not available");
       }
-      if (isMobile) {
-        this.containerEl.offsetHeight;
-        await this.waitForContainerSize();
-        console.log("VEGETA EditorView: Mobile container sized");
-      }
       this.root = client.createRoot(container);
-      console.log("VEGETA EditorView: React root created");
+      console.log("VEGETA PC EditorView: React root created");
       this.root.render(
         /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorOutputPane, {}) }) })
       );
-      console.log("VEGETA EditorView: React component rendered");
+      console.log("VEGETA PC EditorView: React component rendered");
     } catch (error) {
-      console.error("VEGETA EditorView: Failed to open view:", error);
+      console.error("VEGETA PC EditorView: Failed to open view:", error);
       if ((_b = this.plugin) == null ? void 0 : _b.logToVaultFile) {
         await this.plugin.logToVaultFile(error);
       }
       this.containerEl.empty();
       const errorDiv = this.containerEl.createDiv();
-      errorDiv.setText(`VEGETA Editor View Error: ${error.message}`);
+      errorDiv.setText(`VEGETA PC Editor View Error: ${error.message}`);
       errorDiv.style.padding = "20px";
       errorDiv.style.color = "red";
     }
   }
   injectConductorStyles() {
-    if (document.getElementById("conductor-editor-styles"))
+    if (document.getElementById("conductor-pc-editor-styles"))
       return;
     const style = document.createElement("style");
-    style.id = "conductor-editor-styles";
+    style.id = "conductor-pc-editor-styles";
     style.textContent = `
-            /* Mobile-specific fixes */
-            .workspace-leaf-content[data-type="vegeta-terminal"] {
-                padding: 0 !important;
-                overflow: hidden !important;
-                position: relative !important;
+            /* PC-optimized styles */
+            .conductor-editor-container.pc-optimized {
+                padding: 0.5rem !important;
+                /* Enhanced visuals for PC */
+                box-shadow: 0 0 10px rgba(99, 162, 255, 0.1) !important;
+                border: 1px solid rgba(99, 162, 255, 0.4) !important;
             }
             
-            .mobile-terminal-view {
-                width: 100% !important;
-                height: 100% !important;
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                bottom: 0 !important;
+            /* PC-specific hover effects */
+            .pc-optimized button:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             }
             
-            /* Layout and Structure */
-            .conductor-editor-container .w-full { width: 100% !important; }
-            .conductor-editor-container .h-full { height: 100% !important; }
-            .conductor-editor-container .flex { display: flex !important; }
-            .conductor-editor-container .flex-col { flex-direction: column !important; }
-            .conductor-editor-container .flex-1 { flex: 1 1 0% !important; }
-            .conductor-editor-container .items-center { align-items: center !important; }
-            .conductor-editor-container .justify-center { justify-content: center !important; }
-            .conductor-editor-container .justify-between { justify-content: space-between !important; }
-            .conductor-editor-container .gap-1 { gap: 0.25rem !important; }
-            .conductor-editor-container .gap-2 { gap: 0.5rem !important; }
-            .conductor-editor-container .flex-wrap { flex-wrap: wrap !important; }
-            
-            /* Border and Shape */
-            .conductor-editor-container .border { border-width: 1px !important; }
-            .conductor-editor-container .border-b { border-bottom-width: 1px !important; }
-            .conductor-editor-container .border-t { border-top-width: 1px !important; }
-            .conductor-editor-container .border-navy-600 {
-                border-color: rgb(99, 162, 255) !important;
-            }
-            .conductor-editor-container .rounded { border-radius: 0.25rem !important; }
-            
-            /* Background Colors */
-            .conductor-editor-container .bg-black {
-                background-color: rgb(0, 0, 0) !important;
-            }
-            .conductor-editor-container .bg-gray-800 {
-                background-color: rgb(31, 41, 55) !important;
-            }
-            .conductor-editor-container .bg-gray-900 {
-                background-color: rgb(17, 24, 39) !important;
+            /* Enhanced scrollbars for PC */
+            .pc-optimized::-webkit-scrollbar {
+                width: 12px;
+                height: 12px;
             }
             
-            /* Text Colors */
-            .conductor-editor-container .text-navy-600 {
-                color: rgb(99, 162, 255) !important;
-            }
-            .conductor-editor-container .text-gray-200 {
-                color: rgb(229, 231, 235) !important;
-            }
-            .conductor-editor-container .text-gray-400 {
-                color: rgb(156, 163, 175) !important;
-            }
-            .conductor-editor-container .text-gray-500 {
-                color: rgb(107, 114, 128) !important;
+            .pc-optimized::-webkit-scrollbar-thumb {
+                background: rgba(99, 162, 255, 0.6);
+                border-radius: 6px;
             }
             
-            /* Typography */
-            .conductor-editor-container .font-mono {
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace !important;
-            }
-            .conductor-editor-container .font-bold { font-weight: 700 !important; }
-            .conductor-editor-container .text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-            .conductor-editor-container .text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
-            
-            /* Spacing */
-            .conductor-editor-container .p-3 { padding: 0.75rem !important; }
-            .conductor-editor-container .p-4 { padding: 1rem !important; }
-            .conductor-editor-container .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-            .conductor-editor-container .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-            .conductor-editor-container .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
-            .conductor-editor-container .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-            
-            /* Layout Utilities */
-            .conductor-editor-container .overflow-y-auto { overflow-y: auto !important; }
-            .conductor-editor-container .relative { position: relative !important; }
-            .conductor-editor-container .overflow-hidden { overflow: hidden !important; }
-            
-            /* Transitions */
-            .conductor-editor-container .transition-colors {
-                transition-property: color, background-color, border-color, text-decoration-color, fill, stroke !important;
-                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-                transition-duration: 0.15s !important;
-            }
-            
-            /* Hover Effects */
-            .conductor-editor-container .hover\\:bg-navy-600:hover {
-                background-color: rgb(99, 162, 255) !important;
-            }
-            .conductor-editor-container .hover\\:text-white:hover {
-                color: rgb(255, 255, 255) !important;
-            }
-            
-            /* Obsidian sync status icon fix */
-            .status-bar-item.mod-clickable {
-                display: none !important;
-            }
-            .sync-status-icon {
-                display: none !important;
-            }
-            
-            /* Remove black background interference */
-            .status-bar, .workspace-tab-container {
-                background: transparent !important;
-            }
-            .workspace-ribbon {
-                background: transparent !important;
-            }
-            .workspace-split.mod-vertical > * > .workspace-leaf-resize-handle,
-            .workspace-split.mod-horizontal > * > .workspace-leaf-resize-handle {
-                background-color: transparent !important;
+            .pc-optimized::-webkit-scrollbar-thumb:hover {
+                background: rgba(99, 162, 255, 0.8);
             }
         `;
     document.head.appendChild(style);
   }
   createDynamicBorderPane() {
-    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
-    if (isMobile) {
-      console.log("VEGETA EditorView: Skipping border pane on mobile");
-      return;
-    }
     this.borderPane = this.containerEl.createDiv();
-    this.borderPane.addClass("vegeta-pane");
+    this.borderPane.addClass("vegeta-pane", "pc-border");
     this.borderPane.style.position = "absolute";
     this.borderPane.style.pointerEvents = "none";
     this.borderPane.style.border = "2px solid navy";
     this.borderPane.style.boxSizing = "border-box";
     this.borderPane.style.zIndex = "1000";
+    this.borderPane.style.borderRadius = "4px";
     this.setupResizeObserver();
     this.updateBorderPaneSize();
   }
@@ -32694,16 +32633,9 @@ class EditorView extends obsidian.ItemView {
     this.borderPane.style.height = `${height}px`;
     this.borderPane.style.top = "0px";
     this.borderPane.style.left = "0px";
-    console.log("VEGETA Border Pane Updated:", {
-      parentWidth: parent.clientWidth,
-      parentHeight: parent.clientHeight,
-      calculatedWidth: width,
-      calculatedHeight: height,
-      borderThickness
-    });
   }
   async onClose() {
-    console.log("VEGETA EditorView: Closing view");
+    console.log("VEGETA PC EditorView: Closing view");
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
@@ -32716,111 +32648,258 @@ class EditorView extends obsidian.ItemView {
       this.borderPane.remove();
       this.borderPane = null;
     }
-    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
-    if (isMobile) {
-      this.containerEl.empty();
+  }
+}
+class MobileEditorView extends obsidian.ItemView {
+  constructor(leaf, plugin) {
+    super(leaf);
+    this.root = null;
+    this.initTimeout = null;
+    this.plugin = plugin;
+  }
+  getViewType() {
+    return EDITOR_VIEW_TYPE;
+  }
+  getDisplayText() {
+    return "VEGETA-Terminal (Mobile)";
+  }
+  async waitForContainerReady() {
+    let attempts = 0;
+    while (attempts < 10) {
+      if (this.containerEl && this.containerEl.parentElement) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
     }
+  }
+  async waitForContainerSize() {
+    let attempts = 0;
+    while (attempts < 10) {
+      const rect = this.containerEl.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+  }
+  async onOpen() {
+    var _a;
+    console.log("VEGETA Mobile EditorView: onOpen called");
+    try {
+      await this.waitForContainerReady();
+      this.containerEl.empty();
+      this.containerEl.style.width = "100%";
+      this.containerEl.style.height = "100%";
+      this.containerEl.style.overflow = "hidden";
+      this.containerEl.style.position = "relative";
+      this.containerEl.addClass("mobile-terminal-view");
+      console.log("VEGETA Mobile EditorView: Container prepared");
+      this.injectMobileConductorStyles();
+      console.log("VEGETA Mobile EditorView: Mobile styles injected");
+      const container = this.containerEl.createDiv();
+      container.addClass("conductor-editor-container", "mobile-optimized");
+      container.style.width = "100%";
+      container.style.height = "100%";
+      container.style.display = "flex";
+      container.style.flexDirection = "column";
+      container.style.padding = "0.25rem";
+      console.log("VEGETA Mobile EditorView: Container div created");
+      console.log("VEGETA Mobile EditorView: Creating React root");
+      if (!client || !client.createRoot) {
+        throw new Error("ReactDOM.createRoot is not available");
+      }
+      await this.waitForContainerSize();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      this.root = client.createRoot(container);
+      console.log("VEGETA Mobile EditorView: React root created");
+      this.root.render(
+        /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorOutputPane, {}) }) })
+      );
+      console.log("VEGETA Mobile EditorView: React component rendered");
+    } catch (error) {
+      console.error("VEGETA Mobile EditorView: Failed to open view:", error);
+      if ((_a = this.plugin) == null ? void 0 : _a.logToVaultFile) {
+        await this.plugin.logToVaultFile(error);
+      }
+      this.containerEl.empty();
+      const errorDiv = this.containerEl.createDiv();
+      errorDiv.setText(`VEGETA Mobile Error: ${error.message}`);
+      errorDiv.style.padding = "16px";
+      errorDiv.style.color = "red";
+      errorDiv.style.fontSize = "16px";
+    }
+  }
+  injectMobileConductorStyles() {
+    if (document.getElementById("conductor-mobile-editor-styles"))
+      return;
+    const style = document.createElement("style");
+    style.id = "conductor-mobile-editor-styles";
+    style.textContent = `
+            /* Mobile-optimized styles */
+            .conductor-editor-container.mobile-optimized {
+                padding: 0.25rem !important;
+                margin: 0 !important;
+                border: none !important;
+                /* Mobile touch optimizations */
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .mobile-terminal-view {
+                width: 100% !important;
+                height: 100% !important;
+                position: relative !important;
+                overflow: hidden !important;
+            }
+            
+            /* Touch-friendly buttons */
+            .mobile-optimized button,
+            .mobile-optimized .clickable {
+                min-height: 44px !important;
+                min-width: 44px !important;
+                padding: 12px !important;
+                touch-action: manipulation;
+                font-size: 16px !important;
+            }
+            
+            /* Prevent zoom on inputs */
+            .mobile-optimized input,
+            .mobile-optimized textarea {
+                font-size: 16px !important;
+                touch-action: manipulation;
+            }
+            
+            /* Mobile scrollbars */
+            .mobile-optimized::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            
+            .mobile-optimized::-webkit-scrollbar-thumb {
+                background: rgba(99, 162, 255, 0.4);
+                border-radius: 3px;
+            }
+            
+            /* Mobile typography */
+            .mobile-optimized .text-xs { 
+                font-size: 14px !important; 
+            }
+            .mobile-optimized .text-sm { 
+                font-size: 16px !important; 
+            }
+            
+            /* Landscape adjustments */
+            @media (orientation: landscape) and (max-height: 500px) {
+                .mobile-optimized {
+                    padding: 0.125rem !important;
+                }
+            }
+        `;
+    document.head.appendChild(style);
+  }
+  async onClose() {
+    console.log("VEGETA Mobile EditorView: Closing view");
+    if (this.initTimeout) {
+      clearTimeout(this.initTimeout);
+      this.initTimeout = null;
+    }
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
+    }
+    this.containerEl.empty();
   }
 }
 const conductor = "";
 class VegetaTerminalPlugin extends obsidian.Plugin {
   constructor() {
     super(...arguments);
-    this.retryCount = 0;
-    this.maxRetries = 5;
     this.statusBarItem = null;
   }
   async onload() {
     console.log("VEGETA: Plugin loading started");
-    this.logToFile("VEGETA plugin loading started", "info");
-    await this.logToVaultFile(`VEGETA plugin loading - Platform: ${this.app.isMobile ? "MOBILE" : "DESKTOP"}, App version: ${this.app.vault.adapter.appId || "unknown"}`);
-    if (obsidian.Platform.isMobile) {
-      this.statusBarItem = this.addStatusBarItem();
-      this.statusBarItem.setText("VEGETA initializing...");
-    }
+    this.deviceInfo = useDeviceType();
+    this.config = getOptimalConfig(this.deviceInfo);
+    console.log(`VEGETA: Detected device type: ${this.deviceInfo.type}`);
+    console.log("VEGETA: Device config:", this.config);
+    await this.logToVaultFile(`VEGETA plugin loading - Device: ${this.deviceInfo.type}, Screen: ${this.deviceInfo.screenWidth}x${this.deviceInfo.screenHeight}`);
+    this.statusBarItem = this.addStatusBarItem();
+    this.statusBarItem.setText(`VEGETA (${this.deviceInfo.type.toUpperCase()})`);
     this.app.workspace.onLayoutReady(() => {
+      var _a, _b;
       try {
-        this.registerView(EDITOR_VIEW_TYPE, (leaf) => new EditorView(leaf, this));
+        if (this.deviceInfo.type === "mobile") {
+          console.log("VEGETA: Registering Mobile Editor View");
+          this.registerView(EDITOR_VIEW_TYPE, (leaf) => new MobileEditorView(leaf, this));
+        } else {
+          console.log("VEGETA: Registering PC Editor View");
+          this.registerView(EDITOR_VIEW_TYPE, (leaf) => new PCEditorView(leaf, this));
+        }
         console.log("VEGETA: View registered successfully");
-        this.logToFile("View registered successfully", "info");
+        (_a = this.statusBarItem) == null ? void 0 : _a.setText(`VEGETA (${this.deviceInfo.type.toUpperCase()}) ✓`);
       } catch (error) {
         console.error("VEGETA: Failed to register view:", error);
-        this.logToFile(`Failed to register view: ${error}`, "error");
         this.logToVaultFile(error);
+        (_b = this.statusBarItem) == null ? void 0 : _b.setText(`VEGETA (${this.deviceInfo.type.toUpperCase()}) ✗`);
       }
       try {
-        this.addRibbonIcon("terminal-square", "Open VEGETA‐Terminal", async () => {
+        this.addRibbonIcon("terminal-square", `Open VEGETA‐Terminal (${this.deviceInfo.type.toUpperCase()})`, async () => {
           await this.setupTerminalView();
         });
         console.log("VEGETA: Ribbon icon added");
-        this.logToFile("Ribbon icon added", "info");
       } catch (error) {
         console.error("VEGETA: Failed to add ribbon icon:", error);
-        this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
         this.logToVaultFile(error);
       }
-      if (obsidian.Platform.isMobile || this.app.isMobile) {
-        console.log("VEGETA: Mobile environment detected");
-        this.logToFile("Mobile environment detected", "info");
-        this.logToVaultFile("モバイル環境で起動");
+      if (this.deviceInfo.type === "mobile") {
         this.setupMobileView();
       } else {
-        console.log("VEGETA: Desktop environment detected");
-        this.logToFile("Desktop environment detected", "info");
         this.setupTerminalView();
       }
     });
     this.addCommand({
       id: "setup-vegeta-terminal",
-      name: "Setup VEGETA‐Terminal",
+      name: `Setup VEGETA‐Terminal (${this.deviceInfo.type.toUpperCase()})`,
       callback: async () => {
         await this.setupTerminalView();
       }
     });
   }
   async setupMobileView() {
+    var _a, _b;
     try {
+      console.log("VEGETA: Mobile setup starting");
       await this.waitForWorkspaceReady();
       await this.logToVaultFile("Mobile: workspace ready");
-      await this.waitForMobileReady();
+      await new Promise((resolve) => setTimeout(resolve, this.config.renderDelay));
       await this.logToVaultFile("Mobile: app fully ready");
       const success = await this.setupTerminalViewWithRetry();
       if (success) {
-        this.logToFile("VEGETA mobile initialization successful", "info");
         await this.logToVaultFile("Mobile: initialization successful");
-        this.updateStatusBar("VEGETA ready");
+        (_a = this.statusBarItem) == null ? void 0 : _a.setText("VEGETA (MOBILE) Ready");
       } else {
-        throw new Error("Failed to setup view after retries");
+        throw new Error("Failed to setup mobile view after retries");
       }
     } catch (error) {
       console.error("VEGETA: Mobile setup error:", error);
-      this.logToFile(`VEGETA mobile initialization failed: ${error.message}`, "error");
       await this.logToVaultFile(error);
-      this.updateStatusBar("VEGETA failed to load");
-    }
-  }
-  async waitForMobileReady() {
-    var _a, _b, _c;
-    if (document.readyState !== "complete") {
-      await new Promise((resolve) => {
-        window.addEventListener("load", resolve, { once: true });
-      });
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    while ((_c = (_b = (_a = this.app.workspace.activeLeaf) == null ? void 0 : _a.view) == null ? void 0 : _b.containerEl) == null ? void 0 : _c.classList.contains("is-loading")) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      (_b = this.statusBarItem) == null ? void 0 : _b.setText("VEGETA (MOBILE) Failed");
     }
   }
   async setupTerminalViewWithRetry() {
-    for (let i = 0; i < this.maxRetries; i++) {
+    for (let i = 0; i < this.config.maxRetries; i++) {
       try {
         await this.setupTerminalView();
         return true;
       } catch (error) {
         console.warn(`VEGETA: Setup attempt ${i + 1} failed:`, error);
         await this.logToVaultFile(`Retry ${i + 1}: ${error.message}`);
-        if (i < this.maxRetries - 1) {
-          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1e3));
+        if (i < this.config.maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, this.config.retryDelay * Math.pow(2, i)));
         }
       }
     }
@@ -32846,38 +32925,19 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
     });
   }
   async setupTerminalView() {
-    console.log("VEGETA: setupTerminalView called");
-    this.logToFile("setupTerminalView called", "info");
+    console.log(`VEGETA: setupTerminalView called for ${this.deviceInfo.type}`);
     try {
       const { workspace } = this.app;
       workspace.detachLeavesOfType(EDITOR_VIEW_TYPE);
       let targetLeaf;
-      if (obsidian.Platform.isMobile || this.app.isMobile) {
+      if (this.deviceInfo.type === "mobile") {
         console.log("VEGETA: Creating mobile leaf");
-        this.logToFile("Creating mobile leaf", "info");
         await this.logToVaultFile("Mobile: attempting to create leaf");
         const existingLeaves = workspace.getLeavesOfType(EDITOR_VIEW_TYPE);
         if (existingLeaves.length > 0) {
           targetLeaf = existingLeaves[0];
-          await this.logToVaultFile("Mobile: reusing existing leaf");
         } else {
-          targetLeaf = workspace.getMostRecentLeaf();
-          if (!targetLeaf || !targetLeaf.view) {
-            const rootSplit = workspace.rootSplit;
-            if (rootSplit) {
-              targetLeaf = workspace.getLeaf(true);
-              await this.logToVaultFile("Mobile: created new leaf from root split");
-            }
-          }
-          if (!targetLeaf) {
-            targetLeaf = workspace.getLeaf("tab");
-            if (!targetLeaf) {
-              targetLeaf = workspace.getLeaf(true);
-            }
-            await this.logToVaultFile("Mobile: created new leaf (fallback)");
-          } else {
-            await this.logToVaultFile("Mobile: using most recent leaf");
-          }
+          targetLeaf = workspace.getLeaf("tab") || workspace.getLeaf(true);
         }
       } else {
         targetLeaf = workspace.getRightLeaf(false);
@@ -32886,44 +32946,33 @@ class VegetaTerminalPlugin extends obsidian.Plugin {
         throw new Error("Failed to create or get leaf");
       }
       console.log("VEGETA: Setting view state");
-      this.logToFile("Setting view state", "info");
       await targetLeaf.setViewState({
         type: EDITOR_VIEW_TYPE,
         active: true
       });
       console.log("VEGETA: View state set successfully");
-      this.logToFile("View state set successfully", "info");
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, this.config.renderDelay));
       workspace.revealLeaf(targetLeaf);
       workspace.setActiveLeaf(targetLeaf, { focus: true });
       console.log("VEGETA: Terminal view setup completed");
-      this.logToFile("Terminal view setup completed", "info");
     } catch (error) {
       console.error("VEGETA: Setup error:", error);
-      this.logToFile(`VEGETA setup error: ${error.message}`, "error");
       await this.logToVaultFile(error);
     }
   }
-  logToFile(message, level = "info") {
-    const timestamp = (/* @__PURE__ */ new Date()).toISOString();
-    const logEntry = `[${timestamp}] [VEGETA] [${level.toUpperCase()}] ${message}
-`;
-    const logPath = obsidian.normalizePath(".vegeta.log");
-    this.app.vault.adapter.append(logPath, logEntry).catch((err) => {
-      console.error("Failed to write to log file:", err);
-    });
-  }
   async logToVaultFile(error) {
+    var _a;
     try {
       const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      const deviceType = ((_a = this.deviceInfo) == null ? void 0 : _a.type) || "unknown";
       const errorMessage = error instanceof Error ? `${error.name}: ${error.message}
 Stack: ${error.stack}` : String(error);
-      const logEntry = `[${timestamp}] [VEGETA] ERROR:
+      const logEntry = `[${timestamp}] [VEGETA-${deviceType.toUpperCase()}] ERROR:
 ${errorMessage}
 
 `;
       const logDir = obsidian.normalizePath("90_Log");
-      const logPath = obsidian.normalizePath(`${logDir}/myplugin.log`);
+      const logPath = obsidian.normalizePath(`${logDir}/vegeta-${deviceType}.log`);
       try {
         await this.app.vault.adapter.stat(logDir);
       } catch (e) {
@@ -32934,13 +32983,8 @@ ${errorMessage}
       console.error("VEGETA: Failed to write to vault log:", logError);
     }
   }
-  updateStatusBar(text) {
-    if (this.statusBarItem) {
-      this.statusBarItem.setText(text);
-    }
-  }
   onunload() {
-    this.logToFile("VEGETA plugin unloaded", "info");
+    console.log("VEGETA plugin unloaded");
     this.app.workspace.detachLeavesOfType(EDITOR_VIEW_TYPE);
     if (this.statusBarItem) {
       this.statusBarItem.remove();
