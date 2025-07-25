@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Terminal, Play, Trash2, Download, Zap } from 'lucide-react';
-import { cn, formatTerminalMessage, sleep } from '@/lib/utils';
+import { Terminal, Trash2, Download, Zap } from 'lucide-react';
+import { cn, sleep } from '@/lib/utils';
 
 interface TerminalLine {
   id: string;

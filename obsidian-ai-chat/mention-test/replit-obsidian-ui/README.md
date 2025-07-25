@@ -1,22 +1,25 @@
-# Obsidian GOKU & VEGETA Plugin UI Development
+# 🎯 Obsidian GOKU & VEGETA プラグイン統合開発環境
 
-This is a Replit-optimized development environment for testing and developing the UI components of the Obsidian GOKU and VEGETA plugins.
+**Replit最適化されたObsidian GOKUとVEGETAプラグインのUI開発・テスト環境**
 
-## 🚀 Quick Start
+このプロジェクトでは、ObsidianプラグインGOKU（AIチャット）とVEGETA（ターミナル）の両方を**単一のポート（5173）**で統合的に開発・テストできます。
 
-1. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+## 🚀 クイックスタート
 
-2. **Start Development Server**
-   ```bash
-   npm run dev
-   ```
+### 1. 開発サーバー起動
+```bash
+npm run dev
+```
 
-3. **Access UI**
-   - Click the "Expose this port" button (🌐) in Replit
-   - Or go to `https://your-repl-name.your-username.repl.co`
+### 2. プレビューアクセス
+- Replitで🌐マークをクリックしてUI確認
+- ポート5173で自動的にExposeされます
+- 左右分割でGOKU（AIチャット）とVEGETA（ターミナル）が同時表示
+
+### 3. 基本操作
+- **GOKU**: メッセージ入力 → モデル選択 → 送信
+- **VEGETA**: コマンド入力 → Enter実行
+- **統合テスト**: GOKU→VEGETA間のリアルタイム通信確認
 
 ## 🎯 Features
 
@@ -48,20 +51,31 @@ This is a Replit-optimized development environment for testing and developing th
 - **Icons**: Lucide React
 - **Development**: Replit-optimized configuration
 
-## 📁 Project Structure
+## 📁 プロジェクト構成
 
 ```
-src/
-├── components/
-│   ├── ConductorPanel.tsx    # Main layout component
-│   ├── GOKU.tsx             # Chat interface
-│   └── VEGETA.tsx           # Terminal interface
-├── hooks/
-│   └── useTypingEffect.ts   # Typing animation hook
-├── lib/
-│   └── utils.ts             # Utility functions
-├── main.tsx                 # App entry point
-└── index.css               # Global styles
+replit-obsidian-ui/
+├── src/                          # メインUI開発ディレクトリ
+│   ├── components/
+│   │   ├── ConductorPanel.tsx    # 統合レイアウト（左右分割）
+│   │   ├── GOKU.tsx             # AIチャットインターフェース
+│   │   └── VEGETA.tsx           # ターミナルインターフェース
+│   ├── hooks/
+│   │   └── useTypingEffect.ts   # タイピングアニメーション
+│   ├── lib/
+│   │   └── utils.ts             # ユーティリティ関数
+│   ├── main.tsx                 # アプリエントリーポイント
+│   └── index.css               # グローバルスタイル
+├── plugins/                     # プラグインソース管理
+│   ├── GOKU/                   # GOKUプラグイン設定
+│   │   ├── manifest.json       # Obsidianプラグイン設定
+│   │   └── package.json        # 依存関係
+│   └── VEGETA/                 # VEGETAプラグイン設定
+│       ├── manifest.json       # Obsidianプラグイン設定
+│       └── package.json        # 依存関係
+├── .replit                      # Replit設定（自動起動）
+├── vite.config.ts              # Vite設定（ポート5173）
+└── package.json                # メイン依存関係
 ```
 
 ## 🎨 Customization
@@ -103,10 +117,33 @@ This project is configured for Replit deployment with automatic port exposure an
 3. **Export Logs**: Use VEGETA's export button to download terminal logs
 4. **Model Selection**: Switch between AI models in GOKU for different responses
 
-## 🧪 Testing GOKU → VEGETA Communication
+## 🧪 GOKU → VEGETA 通信テスト手順
 
-1. Type a message in GOKU
-2. Select an AI model
-3. Send the message
-4. Watch VEGETA receive and process the commands
-5. Check browser console for detailed communication logs
+1. **GOKU側**: メッセージ入力 + モデル選択
+2. **送信**: 送信ボタンクリック
+3. **VEGETA側**: コマンド自動受信・実行確認
+4. **ログ確認**: ブラウザコンソールで詳細通信ログ
+5. **Export**: VEGETAのログExport機能でファイル出力
+
+## 🔄 開発ワークフロー
+
+### UI修正・確認
+1. `src/components/` でコンポーネント編集
+2. 自動リロードでリアルタイム確認
+3. 両プラグインUI同時テスト
+
+### プラグイン設定変更
+1. `plugins/GOKU/` または `plugins/VEGETA/` で設定編集
+2. manifest.json更新
+3. 実際のObsidianプラグインへの適用準備
+
+### Replit最適化済み機能
+- ✅ ポート5173自動Expose
+- ✅ Hot Module Replacement
+- ✅ モバイル対応レスポンシブ
+- ✅ ダークテーマ（Obsidian風）
+- ✅ 統合開発環境レイアウト
+
+---
+
+**📝 Usage**: Replitで`npm run dev`実行後、🌐マークからUI確認

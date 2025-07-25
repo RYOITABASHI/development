@@ -1,0 +1,12 @@
+{
+	"id": "goku-multi-model-chat",
+	"name": "GOKU - Multi-Model AI Chat",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Advanced multi-model AI chat interface for Obsidian with real-time conversations and model switching capabilities",
+	"author": "Rebuild Factoryz",
+	"authorUrl": "https://github.com/rebuild-factoryz",
+	"fundingUrl": "https://github.com/sponsors/rebuild-factoryz",
+	"isDesktopOnly": false,
+	"js": "main.js"
+}

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Zap, Brain, Sparkles } from 'lucide-react';
-import { cn, simulateGokuToVegeta } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useTypingEffect } from '@/hooks/useTypingEffect';
 
 type SupportedModel = 'gemini-2.5-pro' | 'gemini-2.5-flash';

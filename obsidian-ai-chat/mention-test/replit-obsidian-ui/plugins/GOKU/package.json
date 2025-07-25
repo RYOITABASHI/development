@@ -1,0 +1,27 @@
+{
+  "name": "goku-multi-model-chat",
+  "version": "1.0.0",
+  "description": "Advanced multi-model AI chat interface for Obsidian with real-time conversations and model switching capabilities",
+  "main": "main.js",
+  "scripts": {
+    "dev": "echo 'Use main dev environment for GOKU development'",
+    "build": "echo 'Build through main environment'"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "ai",
+    "chat",
+    "gemini"
+  ],
+  "author": "Rebuild Factoryz",
+  "license": "MIT",
+  "devDependencies": {
+    "obsidian": "latest"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.400.0"
+  }
+}

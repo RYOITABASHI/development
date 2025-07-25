@@ -1,5 +1,10 @@
+modules = ["nodejs-20"]
+
 [nix]
 channel = "stable-24_05"
+
+[workspace]
+recentFiles = ["src/main.tsx", "src/components/ConductorPanel.tsx", "src/components/GOKU.tsx", "src/components/VEGETA.tsx"]
 
 [deployment]
 run = ["npm", "run", "dev"]
@@ -11,3 +16,5 @@ externalPort = 80
 
 [env]
 NODE_ENV = "development"
+VITE_DEV_MODE = "true"
+REPLIT_ENV = "true"

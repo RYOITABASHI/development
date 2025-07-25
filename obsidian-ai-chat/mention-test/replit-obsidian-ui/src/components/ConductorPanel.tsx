@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Zap, Terminal, Settings, Info } from 'lucide-react';
+import { Zap, Terminal, Info } from 'lucide-react';
 import { cn, simulateGokuToVegeta } from '@/lib/utils';
 import GOKU from './GOKU';
 import VEGETA from './VEGETA';

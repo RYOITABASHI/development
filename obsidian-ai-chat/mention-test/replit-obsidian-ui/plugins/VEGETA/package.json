@@ -1,0 +1,27 @@
+{
+  "name": "vegeta-terminal-output",
+  "version": "1.0.0",
+  "description": "Professional terminal output interface with real-time command execution and ANSI color support for Obsidian",
+  "main": "main.js",
+  "scripts": {
+    "dev": "echo 'Use main dev environment for VEGETA development'",
+    "build": "echo 'Build through main environment'"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "terminal",
+    "output",
+    "development"
+  ],
+  "author": "Rebuild Factoryz",
+  "license": "MIT",
+  "devDependencies": {
+    "obsidian": "latest"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.400.0"
+  }
+}

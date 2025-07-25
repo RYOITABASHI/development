@@ -1,0 +1,12 @@
+{
+	"id": "vegeta-terminal-output",
+	"name": "VEGETA - Terminal Output",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Professional terminal output interface with real-time command execution and ANSI color support for Obsidian",
+	"author": "Rebuild Factoryz",
+	"authorUrl": "https://github.com/rebuild-factoryz",
+	"fundingUrl": "https://github.com/sponsors/rebuild-factoryz",
+	"isDesktopOnly": false,
+	"js": "main.js"
+}
