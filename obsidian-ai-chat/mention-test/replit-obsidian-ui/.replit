@@ -1,0 +1,13 @@
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["npm", "run", "dev"]
+deploymentTarget = "static"
+
+[[ports]]
+localPort = 5173
+externalPort = 80
+
+[env]
+NODE_ENV = "development"
