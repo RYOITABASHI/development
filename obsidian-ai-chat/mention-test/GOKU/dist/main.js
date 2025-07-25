@@ -1,5 +1,72 @@
 "use strict";
 const obsidian = require("obsidian");
+function useDeviceType() {
+  var _a, _b;
+  const obsidianMobile = obsidian.Platform.isMobile;
+  const screenWidth = ((_a = window.screen) == null ? void 0 : _a.width) || window.innerWidth;
+  const screenHeight = ((_b = window.screen) == null ? void 0 : _b.height) || window.innerHeight;
+  const userAgent = navigator.userAgent.toLowerCase();
+  const mobileUserAgents = [
+    "android",
+    "iphone",
+    "ipad",
+    "ipod",
+    "blackberry",
+    "windows phone",
+    "mobile",
+    "tablet"
+  ];
+  const hasMobileUserAgent = mobileUserAgents.some((agent) => userAgent.includes(agent));
+  const smallScreen = screenWidth <= 768;
+  const tabletScreen = screenWidth > 768 && screenWidth <= 1024;
+  const isTablet = tabletScreen || userAgent.includes("tablet") || userAgent.includes("ipad");
+  const isMobile = obsidianMobile || hasMobileUserAgent || smallScreen;
+  const type = isMobile ? "mobile" : "pc";
+  console.log("Device Detection:", {
+    obsidianMobile,
+    hasMobileUserAgent,
+    smallScreen,
+    screenWidth,
+    screenHeight,
+    userAgent: userAgent.substring(0, 50) + "...",
+    finalType: type
+  });
+  return {
+    type,
+    isMobile,
+    isTablet,
+    screenWidth,
+    screenHeight,
+    userAgent
+  };
+}
+function getOptimalConfig(deviceInfo) {
+  if (deviceInfo.type === "mobile") {
+    return {
+      // Mobile-optimized settings
+      maxRetries: 3,
+      retryDelay: 500,
+      renderDelay: 300,
+      useSimplifiedUI: true,
+      enableBorderPane: false,
+      containerPadding: "0.25rem",
+      fontSize: "16px",
+      buttonMinSize: "44px"
+    };
+  } else {
+    return {
+      // PC-optimized settings
+      maxRetries: 5,
+      retryDelay: 1e3,
+      renderDelay: 100,
+      useSimplifiedUI: false,
+      enableBorderPane: true,
+      containerPadding: "0.5rem",
+      fontSize: "14px",
+      buttonMinSize: "32px"
+    };
+  }
+}
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
@@ -32748,8 +32815,8 @@ const ConductorChatPane = () => {
     }
   );
 };
-const CHAT_VIEW_TYPE = "conductor-chat-view";
-class ChatView extends obsidian.ItemView {
+const CHAT_VIEW_TYPE = "goku-chat";
+class PCChatView extends obsidian.ItemView {
   constructor(leaf, plugin) {
     super(leaf);
     this.root = null;
@@ -32761,246 +32828,104 @@ class ChatView extends obsidian.ItemView {
     return CHAT_VIEW_TYPE;
   }
   getDisplayText() {
-    return "GOKU‐AI Chat";
+    return "GOKU‐AI Chat (PC)";
   }
   async onOpen() {
     var _a, _b;
-    console.log("GOKU ChatView: onOpen called");
+    console.log("GOKU PC ChatView: onOpen called");
     try {
-      const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
       this.containerEl.empty();
       this.containerEl.style.width = "100%";
       this.containerEl.style.height = "100%";
       this.containerEl.style.overflow = "hidden";
       this.containerEl.style.position = "relative";
-      if (isMobile) {
-        this.containerEl.addClass("mobile-chat-view");
-      }
-      console.log("GOKU ChatView: Container prepared");
+      console.log("GOKU PC ChatView: Container prepared");
       this.injectConductorStyles();
-      console.log("GOKU ChatView: Styles injected");
+      console.log("GOKU PC ChatView: Styles injected");
       const container = this.containerEl.createDiv();
-      container.addClass("conductor-chat-container");
+      container.addClass("conductor-chat-container", "pc-optimized");
       container.style.width = "100%";
       container.style.height = "100%";
       container.style.display = "flex";
       container.style.flexDirection = "column";
-      console.log("GOKU ChatView: Container div created");
+      console.log("GOKU PC ChatView: Container div created");
       try {
         this.createDynamicBorderPane();
-        console.log("GOKU ChatView: Border pane created");
+        console.log("GOKU PC ChatView: Border pane created");
       } catch (borderError) {
-        console.error("GOKU ChatView: Border pane creation failed:", borderError);
+        console.error("GOKU PC ChatView: Border pane creation failed:", borderError);
         if ((_a = this.plugin) == null ? void 0 : _a.logToVaultFile) {
           await this.plugin.logToVaultFile(borderError);
         }
       }
-      console.log("GOKU ChatView: Creating React root");
+      console.log("GOKU PC ChatView: Creating React root");
       if (!client || !client.createRoot) {
         throw new Error("ReactDOM.createRoot is not available");
       }
-      if (isMobile) {
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        console.log("GOKU ChatView: Mobile delay completed");
-      }
       this.root = client.createRoot(container);
-      console.log("GOKU ChatView: React root created");
+      console.log("GOKU PC ChatView: React root created");
       this.root.render(
         /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorChatPane, {}) }) })
       );
-      console.log("GOKU ChatView: React component rendered");
+      console.log("GOKU PC ChatView: React component rendered");
     } catch (error) {
-      console.error("GOKU ChatView: Failed to open view:", error);
+      console.error("GOKU PC ChatView: Failed to open view:", error);
       if ((_b = this.plugin) == null ? void 0 : _b.logToVaultFile) {
         await this.plugin.logToVaultFile(error);
       }
       this.containerEl.empty();
       const errorDiv = this.containerEl.createDiv();
-      errorDiv.setText(`GOKU Chat View Error: ${error.message}`);
+      errorDiv.setText(`GOKU PC Chat View Error: ${error.message}`);
       errorDiv.style.padding = "20px";
       errorDiv.style.color = "red";
     }
   }
   injectConductorStyles() {
-    if (document.getElementById("conductor-styles"))
+    if (document.getElementById("conductor-pc-styles"))
       return;
     const style = document.createElement("style");
-    style.id = "conductor-styles";
+    style.id = "conductor-pc-styles";
     style.textContent = `
-            /* Mobile-specific fixes */
-            .workspace-leaf-content[data-type="goku-chat"] {
-                padding: 0 !important;
-                overflow: hidden !important;
-                position: relative !important;
+            /* PC-optimized styles */
+            .conductor-chat-container.pc-optimized {
+                padding: 0.5rem !important;
+                /* Enhanced visuals for PC */
+                box-shadow: 0 0 10px rgba(255, 165, 0, 0.1) !important;
+                border: 1px solid rgba(255, 165, 0, 0.4) !important;
             }
             
-            .mobile-chat-view {
-                width: 100% !important;
-                height: 100% !important;
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                bottom: 0 !important;
+            /* PC-specific hover effects */
+            .pc-optimized button:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             }
             
-            /* Layout and Structure */
-            .conductor-chat-container .w-full { width: 100% !important; }
-            .conductor-chat-container .h-full { height: 100% !important; }
-            .conductor-chat-container .flex { display: flex !important; }
-            .conductor-chat-container .flex-col { flex-direction: column !important; }
-            .conductor-chat-container .flex-1 { flex: 1 1 0% !important; }
-            .conductor-chat-container .items-center { align-items: center !important; }
-            .conductor-chat-container .justify-between { justify-content: space-between !important; }
-            .conductor-chat-container .gap-1 { gap: 0.25rem !important; }
-            .conductor-chat-container .gap-2 { gap: 0.5rem !important; }
-            .conductor-chat-container .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 1rem !important;
-                margin-bottom: 0 !important;
+            /* Enhanced scrollbars for PC */
+            .pc-optimized::-webkit-scrollbar {
+                width: 12px;
+                height: 12px;
             }
             
-            /* Border and Shape */
-            .conductor-chat-container .border { border-width: 1px !important; }
-            .conductor-chat-container .border-b { border-bottom-width: 1px !important; }
-            .conductor-chat-container .border-t { border-top-width: 1px !important; }
-            .conductor-chat-container .border-orange-600 {
-                border-color: rgb(255, 165, 0) !important;
-            }
-            .conductor-chat-container .rounded { border-radius: 0.25rem !important; }
-            .conductor-chat-container .rounded-full { border-radius: 9999px !important; }
-            
-            /* Background Colors */
-            .conductor-chat-container .bg-black {
-                background-color: rgb(0, 0, 0) !important;
-            }
-            .conductor-chat-container .bg-transparent {
-                background-color: transparent !important;
-            }
-            .conductor-chat-container .bg-gray-800 {
-                background-color: rgb(31, 41, 55) !important;
-            }
-            .conductor-chat-container .bg-gray-900 {
-                background-color: rgb(17, 24, 39) !important;
-            }
-            .conductor-chat-container .bg-green-500 {
-                background-color: rgb(34, 197, 94) !important;
+            .pc-optimized::-webkit-scrollbar-thumb {
+                background: rgba(255, 165, 0, 0.6);
+                border-radius: 6px;
             }
             
-            /* Text Colors */
-            .conductor-chat-container .text-orange-600 {
-                color: rgb(255, 165, 0) !important;
-            }
-            .conductor-chat-container .text-gray-200 {
-                color: rgb(229, 231, 235) !important;
-            }
-            .conductor-chat-container .text-gray-400 {
-                color: rgb(156, 163, 175) !important;
-            }
-            
-            /* Typography */
-            .conductor-chat-container .font-mono {
-                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace !important;
-            }
-            .conductor-chat-container .font-black { font-weight: 900 !important; }
-            .conductor-chat-container .font-bold { font-weight: 700 !important; }
-            .conductor-chat-container .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
-            .conductor-chat-container .text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
-            .conductor-chat-container .text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
-            .conductor-chat-container .tracking-wide { letter-spacing: 0.025em !important; }
-            
-            /* Spacing */
-            .conductor-chat-container .p-4 { padding: 1rem !important; }
-            .conductor-chat-container .px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
-            .conductor-chat-container .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-            .conductor-chat-container .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-            .conductor-chat-container .pr-20 { padding-right: 5rem !important; }
-            .conductor-chat-container .mb-2 { margin-bottom: 0.5rem !important; }
-            .conductor-chat-container .ml-auto { margin-left: auto !important; }
-            .conductor-chat-container .mr-2 { margin-right: 0.5rem !important; }
-            .conductor-chat-container .w-1\\.5 { width: 0.375rem !important; }
-            .conductor-chat-container .h-1\\.5 { height: 0.375rem !important; }
-            
-            /* Form Elements */
-            .conductor-chat-container .resize-none { resize: none !important; }
-            .conductor-chat-container .overflow-y-auto { overflow-y: auto !important; }
-            
-            /* Animations */
-            .conductor-chat-container .animate-pulse {
-                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
-            }
-            .conductor-chat-container .transition-colors {
-                transition-property: color, background-color, border-color, text-decoration-color, fill, stroke !important;
-                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
-                transition-duration: 0.15s !important;
-            }
-            
-            /* Hover Effects */
-            .conductor-chat-container .hover\\:bg-orange-600:hover {
-                background-color: rgb(255, 165, 0) !important;
-            }
-            .conductor-chat-container .hover\\:text-white:hover {
-                color: rgb(255, 255, 255) !important;
-            }
-            .conductor-chat-container .hover\\:text-orange-400:hover {
-                color: rgb(251, 146, 60) !important;
-            }
-            
-            /* Additional Elements */
-            .conductor-chat-container .absolute { position: absolute !important; }
-            .conductor-chat-container .right-2 { right: 0.5rem !important; }
-            .conductor-chat-container .bottom-2 { bottom: 0.5rem !important; }
-            .conductor-chat-container .p-1 { padding: 0.25rem !important; }
-            .conductor-chat-container .disabled\\:opacity-50:disabled { opacity: 0.5 !important; }
-            .conductor-chat-container .border-2 { border-width: 2px !important; }
-            .conductor-chat-container .border-transparent { border-color: transparent !important; }
-            .conductor-chat-container .border-t-orange-400 { border-top-color: rgb(251, 146, 60) !important; }
-            .conductor-chat-container .w-3\\.5 { width: 0.875rem !important; }
-            .conductor-chat-container .h-3\\.5 { height: 0.875rem !important; }
-            .conductor-chat-container .animate-spin { animation: spin 1s linear infinite !important; }
-            
-            /* Keyframes */
-            @keyframes pulse {
-                50% { opacity: .5; }
-            }
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-            
-            /* Obsidian sync status icon fix */
-            .status-bar-item.mod-clickable {
-                display: none !important;
-            }
-            .sync-status-icon {
-                display: none !important;
-            }
-            
-            /* Remove black background interference */
-            .status-bar, .workspace-tab-container {
-                background: transparent !important;
-            }
-            .workspace-ribbon {
-                background: transparent !important;
-            }
-            .workspace-split.mod-vertical > * > .workspace-leaf-resize-handle,
-            .workspace-split.mod-horizontal > * > .workspace-leaf-resize-handle {
-                background-color: transparent !important;
+            .pc-optimized::-webkit-scrollbar-thumb:hover {
+                background: rgba(255, 165, 0, 0.8);
             }
         `;
     document.head.appendChild(style);
   }
   createDynamicBorderPane() {
-    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
-    if (isMobile) {
-      console.log("GOKU ChatView: Skipping border pane on mobile");
-      return;
-    }
     this.borderPane = this.containerEl.createDiv();
-    this.borderPane.addClass("goku-pane");
+    this.borderPane.addClass("goku-pane", "pc-border");
     this.borderPane.style.position = "absolute";
     this.borderPane.style.pointerEvents = "none";
     this.borderPane.style.border = "2px solid orange";
     this.borderPane.style.boxSizing = "border-box";
     this.borderPane.style.zIndex = "1000";
+    this.borderPane.style.borderRadius = "4px";
     this.setupResizeObserver();
     this.updateBorderPaneSize();
   }
@@ -33024,16 +32949,9 @@ class ChatView extends obsidian.ItemView {
     this.borderPane.style.height = `${height}px`;
     this.borderPane.style.top = "0px";
     this.borderPane.style.left = "0px";
-    console.log("GOKU Border Pane Updated:", {
-      parentWidth: parent.clientWidth,
-      parentHeight: parent.clientHeight,
-      calculatedWidth: width,
-      calculatedHeight: height,
-      borderThickness
-    });
   }
   async onClose() {
-    console.log("GOKU ChatView: Closing view");
+    console.log("GOKU PC ChatView: Closing view");
     if (this.resizeObserver) {
       this.resizeObserver.disconnect();
       this.resizeObserver = null;
@@ -33046,111 +32964,258 @@ class ChatView extends obsidian.ItemView {
       this.borderPane.remove();
       this.borderPane = null;
     }
-    const isMobile = obsidian.Platform.isMobile || this.app.isMobile;
-    if (isMobile) {
-      this.containerEl.empty();
+  }
+}
+class MobileChatView extends obsidian.ItemView {
+  constructor(leaf, plugin) {
+    super(leaf);
+    this.root = null;
+    this.initTimeout = null;
+    this.plugin = plugin;
+  }
+  getViewType() {
+    return CHAT_VIEW_TYPE;
+  }
+  getDisplayText() {
+    return "GOKU‐AI Chat (Mobile)";
+  }
+  async waitForContainerReady() {
+    let attempts = 0;
+    while (attempts < 10) {
+      if (this.containerEl && this.containerEl.parentElement) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
     }
+  }
+  async waitForContainerSize() {
+    let attempts = 0;
+    while (attempts < 10) {
+      const rect = this.containerEl.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      attempts++;
+    }
+  }
+  async onOpen() {
+    var _a;
+    console.log("GOKU Mobile ChatView: onOpen called");
+    try {
+      await this.waitForContainerReady();
+      this.containerEl.empty();
+      this.containerEl.style.width = "100%";
+      this.containerEl.style.height = "100%";
+      this.containerEl.style.overflow = "hidden";
+      this.containerEl.style.position = "relative";
+      this.containerEl.addClass("mobile-chat-view");
+      console.log("GOKU Mobile ChatView: Container prepared");
+      this.injectMobileConductorStyles();
+      console.log("GOKU Mobile ChatView: Mobile styles injected");
+      const container = this.containerEl.createDiv();
+      container.addClass("conductor-chat-container", "mobile-optimized");
+      container.style.width = "100%";
+      container.style.height = "100%";
+      container.style.display = "flex";
+      container.style.flexDirection = "column";
+      container.style.padding = "0.25rem";
+      console.log("GOKU Mobile ChatView: Container div created");
+      console.log("GOKU Mobile ChatView: Creating React root");
+      if (!client || !client.createRoot) {
+        throw new Error("ReactDOM.createRoot is not available");
+      }
+      await this.waitForContainerSize();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      this.root = client.createRoot(container);
+      console.log("GOKU Mobile ChatView: React root created");
+      this.root.render(
+        /* @__PURE__ */ jsxRuntimeExports.jsx(React.StrictMode, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorProvider, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(ConductorChatPane, {}) }) })
+      );
+      console.log("GOKU Mobile ChatView: React component rendered");
+    } catch (error) {
+      console.error("GOKU Mobile ChatView: Failed to open view:", error);
+      if ((_a = this.plugin) == null ? void 0 : _a.logToVaultFile) {
+        await this.plugin.logToVaultFile(error);
+      }
+      this.containerEl.empty();
+      const errorDiv = this.containerEl.createDiv();
+      errorDiv.setText(`GOKU Mobile Error: ${error.message}`);
+      errorDiv.style.padding = "16px";
+      errorDiv.style.color = "red";
+      errorDiv.style.fontSize = "16px";
+    }
+  }
+  injectMobileConductorStyles() {
+    if (document.getElementById("conductor-mobile-styles"))
+      return;
+    const style = document.createElement("style");
+    style.id = "conductor-mobile-styles";
+    style.textContent = `
+            /* Mobile-optimized styles */
+            .conductor-chat-container.mobile-optimized {
+                padding: 0.25rem !important;
+                margin: 0 !important;
+                border: none !important;
+                /* Mobile touch optimizations */
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .mobile-chat-view {
+                width: 100% !important;
+                height: 100% !important;
+                position: relative !important;
+                overflow: hidden !important;
+            }
+            
+            /* Touch-friendly buttons */
+            .mobile-optimized button,
+            .mobile-optimized .clickable {
+                min-height: 44px !important;
+                min-width: 44px !important;
+                padding: 12px !important;
+                touch-action: manipulation;
+                font-size: 16px !important;
+            }
+            
+            /* Prevent zoom on inputs */
+            .mobile-optimized input,
+            .mobile-optimized textarea {
+                font-size: 16px !important;
+                touch-action: manipulation;
+            }
+            
+            /* Mobile scrollbars */
+            .mobile-optimized::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            
+            .mobile-optimized::-webkit-scrollbar-thumb {
+                background: rgba(255, 165, 0, 0.4);
+                border-radius: 3px;
+            }
+            
+            /* Mobile typography */
+            .mobile-optimized .text-xs { 
+                font-size: 14px !important; 
+            }
+            .mobile-optimized .text-sm { 
+                font-size: 16px !important; 
+            }
+            
+            /* Landscape adjustments */
+            @media (orientation: landscape) and (max-height: 500px) {
+                .mobile-optimized {
+                    padding: 0.125rem !important;
+                }
+            }
+        `;
+    document.head.appendChild(style);
+  }
+  async onClose() {
+    console.log("GOKU Mobile ChatView: Closing view");
+    if (this.initTimeout) {
+      clearTimeout(this.initTimeout);
+      this.initTimeout = null;
+    }
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
+    }
+    this.containerEl.empty();
   }
 }
 const conductor = "";
 class GokuMultiModelPlugin extends obsidian.Plugin {
   constructor() {
     super(...arguments);
-    this.retryCount = 0;
-    this.maxRetries = 5;
     this.statusBarItem = null;
   }
   async onload() {
     console.log("GOKU: Plugin loading started");
-    this.logToFile("GOKU plugin loading started", "info");
-    await this.logToVaultFile(`GOKU plugin loading - Platform: ${this.app.isMobile ? "MOBILE" : "DESKTOP"}, App version: ${this.app.vault.adapter.appId || "unknown"}`);
-    if (obsidian.Platform.isMobile) {
-      this.statusBarItem = this.addStatusBarItem();
-      this.statusBarItem.setText("GOKU initializing...");
-    }
+    this.deviceInfo = useDeviceType();
+    this.config = getOptimalConfig(this.deviceInfo);
+    console.log(`GOKU: Detected device type: ${this.deviceInfo.type}`);
+    console.log("GOKU: Device config:", this.config);
+    await this.logToVaultFile(`GOKU plugin loading - Device: ${this.deviceInfo.type}, Screen: ${this.deviceInfo.screenWidth}x${this.deviceInfo.screenHeight}`);
+    this.statusBarItem = this.addStatusBarItem();
+    this.statusBarItem.setText(`GOKU (${this.deviceInfo.type.toUpperCase()})`);
     this.app.workspace.onLayoutReady(() => {
+      var _a, _b;
       try {
-        this.registerView(CHAT_VIEW_TYPE, (leaf) => new ChatView(leaf, this));
+        if (this.deviceInfo.type === "mobile") {
+          console.log("GOKU: Registering Mobile Chat View");
+          this.registerView(CHAT_VIEW_TYPE, (leaf) => new MobileChatView(leaf, this));
+        } else {
+          console.log("GOKU: Registering PC Chat View");
+          this.registerView(CHAT_VIEW_TYPE, (leaf) => new PCChatView(leaf, this));
+        }
         console.log("GOKU: View registered successfully");
-        this.logToFile("View registered successfully", "info");
+        (_a = this.statusBarItem) == null ? void 0 : _a.setText(`GOKU (${this.deviceInfo.type.toUpperCase()}) ✓`);
       } catch (error) {
         console.error("GOKU: Failed to register view:", error);
-        this.logToFile(`Failed to register view: ${error}`, "error");
         this.logToVaultFile(error);
+        (_b = this.statusBarItem) == null ? void 0 : _b.setText(`GOKU (${this.deviceInfo.type.toUpperCase()}) ✗`);
       }
       try {
-        this.addRibbonIcon("message-square", "Open GOKU‐AI Chat", async () => {
+        this.addRibbonIcon("message-square", `Open GOKU‐AI Chat (${this.deviceInfo.type.toUpperCase()})`, async () => {
           await this.setupChatView();
         });
         console.log("GOKU: Ribbon icon added");
-        this.logToFile("Ribbon icon added", "info");
       } catch (error) {
         console.error("GOKU: Failed to add ribbon icon:", error);
-        this.logToFile(`Failed to add ribbon icon: ${error}`, "error");
         this.logToVaultFile(error);
       }
-      if (obsidian.Platform.isMobile || this.app.isMobile) {
-        console.log("GOKU: Mobile environment detected");
-        this.logToFile("Mobile environment detected", "info");
-        this.logToVaultFile("モバイル環境で起動");
+      if (this.deviceInfo.type === "mobile") {
         this.setupMobileView();
       } else {
-        console.log("GOKU: Desktop environment detected");
-        this.logToFile("Desktop environment detected", "info");
         this.setupChatView();
       }
     });
     this.addCommand({
       id: "setup-goku-chat",
-      name: "Setup GOKU‐AI Chat",
+      name: `Setup GOKU‐AI Chat (${this.deviceInfo.type.toUpperCase()})`,
       callback: async () => {
         await this.setupChatView();
       }
     });
   }
   async setupMobileView() {
+    var _a, _b;
     try {
+      console.log("GOKU: Mobile setup starting");
       await this.waitForWorkspaceReady();
       await this.logToVaultFile("Mobile: workspace ready");
-      await this.waitForMobileReady();
+      await new Promise((resolve) => setTimeout(resolve, this.config.renderDelay));
       await this.logToVaultFile("Mobile: app fully ready");
       const success = await this.setupChatViewWithRetry();
       if (success) {
-        this.logToFile("GOKU mobile initialization successful", "info");
         await this.logToVaultFile("Mobile: initialization successful");
-        this.updateStatusBar("GOKU ready");
+        (_a = this.statusBarItem) == null ? void 0 : _a.setText("GOKU (MOBILE) Ready");
       } else {
-        throw new Error("Failed to setup view after retries");
+        throw new Error("Failed to setup mobile view after retries");
       }
     } catch (error) {
       console.error("GOKU: Mobile setup error:", error);
-      this.logToFile(`GOKU mobile initialization failed: ${error.message}`, "error");
       await this.logToVaultFile(error);
-      this.updateStatusBar("GOKU failed to load");
-    }
-  }
-  async waitForMobileReady() {
-    var _a, _b, _c;
-    if (document.readyState !== "complete") {
-      await new Promise((resolve) => {
-        window.addEventListener("load", resolve, { once: true });
-      });
-    }
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    while ((_c = (_b = (_a = this.app.workspace.activeLeaf) == null ? void 0 : _a.view) == null ? void 0 : _b.containerEl) == null ? void 0 : _c.classList.contains("is-loading")) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      (_b = this.statusBarItem) == null ? void 0 : _b.setText("GOKU (MOBILE) Failed");
     }
   }
   async setupChatViewWithRetry() {
-    for (let i = 0; i < this.maxRetries; i++) {
+    for (let i = 0; i < this.config.maxRetries; i++) {
       try {
         await this.setupChatView();
         return true;
       } catch (error) {
         console.warn(`GOKU: Setup attempt ${i + 1} failed:`, error);
         await this.logToVaultFile(`Retry ${i + 1}: ${error.message}`);
-        if (i < this.maxRetries - 1) {
-          await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1e3));
+        if (i < this.config.maxRetries - 1) {
+          await new Promise((resolve) => setTimeout(resolve, this.config.retryDelay * Math.pow(2, i)));
         }
       }
     }
@@ -33176,38 +33241,19 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
     });
   }
   async setupChatView() {
-    console.log("GOKU: setupChatView called");
-    this.logToFile("setupChatView called", "info");
+    console.log(`GOKU: setupChatView called for ${this.deviceInfo.type}`);
     try {
       const { workspace } = this.app;
       workspace.detachLeavesOfType(CHAT_VIEW_TYPE);
       let targetLeaf;
-      if (obsidian.Platform.isMobile || this.app.isMobile) {
+      if (this.deviceInfo.type === "mobile") {
         console.log("GOKU: Creating mobile leaf");
-        this.logToFile("Creating mobile leaf", "info");
         await this.logToVaultFile("Mobile: attempting to create leaf");
         const existingLeaves = workspace.getLeavesOfType(CHAT_VIEW_TYPE);
         if (existingLeaves.length > 0) {
           targetLeaf = existingLeaves[0];
-          await this.logToVaultFile("Mobile: reusing existing leaf");
         } else {
-          targetLeaf = workspace.getMostRecentLeaf();
-          if (!targetLeaf || !targetLeaf.view) {
-            const rootSplit = workspace.rootSplit;
-            if (rootSplit) {
-              targetLeaf = workspace.getLeaf(true);
-              await this.logToVaultFile("Mobile: created new leaf from root split");
-            }
-          }
-          if (!targetLeaf) {
-            targetLeaf = workspace.getLeaf("tab");
-            if (!targetLeaf) {
-              targetLeaf = workspace.getLeaf(true);
-            }
-            await this.logToVaultFile("Mobile: created new leaf (fallback)");
-          } else {
-            await this.logToVaultFile("Mobile: using most recent leaf");
-          }
+          targetLeaf = workspace.getLeaf("tab") || workspace.getLeaf(true);
         }
       } else {
         targetLeaf = workspace.getLeaf(false);
@@ -33216,44 +33262,33 @@ class GokuMultiModelPlugin extends obsidian.Plugin {
         throw new Error("Failed to create or get leaf");
       }
       console.log("GOKU: Setting view state");
-      this.logToFile("Setting view state", "info");
       await targetLeaf.setViewState({
         type: CHAT_VIEW_TYPE,
         active: true
       });
       console.log("GOKU: View state set successfully");
-      this.logToFile("View state set successfully", "info");
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, this.config.renderDelay));
       workspace.revealLeaf(targetLeaf);
       workspace.setActiveLeaf(targetLeaf, { focus: true });
       console.log("GOKU: Chat view setup completed");
-      this.logToFile("Chat view setup completed", "info");
     } catch (error) {
       console.error("GOKU: Setup error:", error);
-      this.logToFile(`GOKU setup error: ${error.message}`, "error");
       await this.logToVaultFile(error);
     }
   }
-  logToFile(message, level = "info") {
-    const timestamp = (/* @__PURE__ */ new Date()).toISOString();
-    const logEntry = `[${timestamp}] [GOKU] [${level.toUpperCase()}] ${message}
-`;
-    const logPath = obsidian.normalizePath(".goku.log");
-    this.app.vault.adapter.append(logPath, logEntry).catch((err) => {
-      console.error("Failed to write to log file:", err);
-    });
-  }
   async logToVaultFile(error) {
+    var _a;
     try {
       const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      const deviceType = ((_a = this.deviceInfo) == null ? void 0 : _a.type) || "unknown";
       const errorMessage = error instanceof Error ? `${error.name}: ${error.message}
 Stack: ${error.stack}` : String(error);
-      const logEntry = `[${timestamp}] [GOKU] ERROR:
+      const logEntry = `[${timestamp}] [GOKU-${deviceType.toUpperCase()}] ERROR:
 ${errorMessage}
 
 `;
       const logDir = obsidian.normalizePath("90_Log");
-      const logPath = obsidian.normalizePath(`${logDir}/myplugin.log`);
+      const logPath = obsidian.normalizePath(`${logDir}/goku-${deviceType}.log`);
       try {
         await this.app.vault.adapter.stat(logDir);
       } catch (e) {
@@ -33264,13 +33299,8 @@ ${errorMessage}
       console.error("GOKU: Failed to write to vault log:", logError);
     }
   }
-  updateStatusBar(text) {
-    if (this.statusBarItem) {
-      this.statusBarItem.setText(text);
-    }
-  }
   onunload() {
-    this.logToFile("GOKU plugin unloaded", "info");
+    console.log("GOKU plugin unloaded");
     this.app.workspace.detachLeavesOfType(CHAT_VIEW_TYPE);
     if (this.statusBarItem) {
       this.statusBarItem.remove();
