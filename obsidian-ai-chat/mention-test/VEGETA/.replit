@@ -4,10 +4,10 @@ modules = ["nodejs-20"]
 channel = "stable-24_05"
 
 [workspace]
-recentFiles = ["src/main.tsx", "src/components/ConductorPanel.tsx", "src/components/GOKU.tsx", "src/components/VEGETA.tsx"]
+recentFiles = ["src/main.tsx", "vite.config.ts", "package.json"]
 
 [deployment]
-run = "cd replit-obsidian-ui && npx vite --host 0.0.0.0 --port 3000"
+run = "cd mention-test/VEGETA && npx vite --host 0.0.0.0 --port 3000"
 deploymentTarget = "static"
 
 [[ports]]
