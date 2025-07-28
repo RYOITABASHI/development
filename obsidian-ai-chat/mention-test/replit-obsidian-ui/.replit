@@ -7,11 +7,11 @@ channel = "stable-24_05"
 recentFiles = ["src/main.tsx", "src/components/ConductorPanel.tsx", "src/components/GOKU.tsx", "src/components/VEGETA.tsx"]
 
 [deployment]
-run = "cd replit-obsidian-ui && npx vite --host 0.0.0.0 --port 3000"
+run = "cd replit-obsidian-ui && npx vite --host 0.0.0.0 --port 5173"
 deploymentTarget = "static"
 
 [[ports]]
-localPort = 3000
+localPort = 5173
 externalPort = 80
 
 [env]
